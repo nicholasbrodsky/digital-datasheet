@@ -1,0 +1,30 @@
+﻿<Window x:Class="DigitalDatasheet.Views.RemarksDocumentEditView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:DigitalDatasheet.Views"
+        mc:Ignorable="d"
+        Closed="Window_Closed"
+        Icon="../Images/microscope_icon.ico"
+        Title="Edit Remarks Document" Height="395" Width="550" MinHeight="200" MinWidth="350" MaxHeight="500" MaxWidth="700">
+    <Border>
+        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Width="450" MaxWidth="600">
+            <TextBlock Text="Select remark from documentation" FontSize="16" Margin="0 4 12 8" />
+            <ComboBox x:Name="remarkSelectionInput" MaxWidth="500" Height="25" Padding="2"
+                      FontSize="14" IsEditable="True"></ComboBox>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0 24">
+                <Button Content="Select" MinWidth="90" MinHeight="30" Click="Select_Click" />
+                <Button Content="Cancel" MinWidth="90" MinHeight="30" Margin="12 0 0 0" Click="Cancel_Click" />
+                <Button Content="Add" MinWidth="90" MinHeight="30" Margin="32 0 0 0" Click="Add_Click" />
+                <Button Content="Update" MinWidth="90" MinHeight="30" Margin="12 0 0 0" Click="Update_Click" />
+            </StackPanel>
+            <TextBlock Text="Section" FontSize="16" Margin="0 4 12 8" />
+            <ComboBox x:Name="sectionTitleInput" MaxWidth="500" Height="25" Padding="2"
+                      FontSize="14" IsEditable="True"></ComboBox>
+            <TextBlock Text="Remark" FontSize="16" Margin="0 4 12 8" />
+            <TextBox x:Name="remarkEditInput" TextWrapping="Wrap" AcceptsReturn="True" MinLines="4"
+                      MaxWidth="500" Padding="2" FontSize="14"/>
+        </StackPanel>
+    </Border>
+</Window>

@@ -1,0 +1,935 @@
+﻿<Window x:Class="DigitalDatasheet.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:DigitalDatasheet" d:DataContext="{d:DesignInstance Type=local:MainWindow}"
+        mc:Ignorable="d"
+        Icon="Images/microscope_icon.ico"
+        WindowStartupLocation="CenterScreen"
+        Closing="Window_Closing"
+        Closed="Window_Closed"
+        Title="PTL - Digital Datasheet"
+        Height="{x:Static SystemParameters.PrimaryScreenHeight}"
+        Width="{x:Static SystemParameters.PrimaryScreenWidth}"
+        WindowState="Maximized">
+
+    <Window.Resources>
+
+        <ContextMenu x:Key="set_data_row_menu">
+            <MenuItem Header="_Set to each structure" Click="Auto_Set_Data_Row" />
+        </ContextMenu>
+
+        <ContextMenu x:Key="measurement_menu">
+            <MenuItem Header="_Normal Background" Tag="standard_background" Click="Measurement_Format_Background" />
+            <MenuItem Header="_Yellow Background" Tag="yellow_background" Click="Measurement_Format_Background">
+                <MenuItem.Icon>
+                    <Image Source="Images/yellow_background_icon.png" />
+                </MenuItem.Icon>
+            </MenuItem>
+            <MenuItem Header="_Add/Remove Note" Click="Measurement_Note_Edit">
+                <MenuItem.Icon>
+                    <Image Source="Images/edit_icon.png" Width="50" />
+                </MenuItem.Icon>
+            </MenuItem>
+            <MenuItem Header="_Zoom" Tag="" Click="MeasurementRow_Zoom_Click" />
+        </ContextMenu>
+
+        <ContextMenu x:Key="requirement_menu">
+            <MenuItem Header="Set to Structure" Click="Set_Structure_Requirement" />
+            <MenuItem Header="Combine/Separate Requirements" Click="Requirements_Grid_Edit" />
+        </ContextMenu>
+
+        <ContextMenu x:Key="remark_menu">
+            <MenuItem Header="_Yellow Background" Tag="yellow_background" Click="Remark_Format_Background">
+                <MenuItem.Icon>
+                    <Image Source="Images/yellow_background_icon.png" />
+                </MenuItem.Icon>
+            </MenuItem>
+            <MenuItem Header="_Normal Background" Tag="standard_background" Click="Remark_Format_Background" />
+            <!--<MenuItem Header="Set to Serial Number(s)" Click="Set_Remark_To_Serial_Number" />-->
+        </ContextMenu>
+
+    </Window.Resources>
+
+    <DockPanel>
+
+        <!--#region Menu-->
+        <Menu DockPanel.Dock="Top" FontSize="14" Padding="4" Background="#fff">
+            <MenuItem Header="_File">
+                <MenuItem Header="_New" Background="#fff" BorderThickness="0" Padding="0 6" Click="New_Job">
+                    <MenuItem.Icon>
+                        <Image Source="Images/new_icon.png" />
+                    </MenuItem.Icon>
+                    <!--<MenuItem Header="_New Window" Click="New_Job" Background="#fff" BorderThickness="0" Padding="0 6" Tag="new" />-->
+                </MenuItem>
+                <MenuItem Header="_Open" Background="#fff" BorderThickness="0" Padding="0 6">
+                    <MenuItem.Icon>
+                        <Image Source="Images/open_icon.png" />
+                    </MenuItem.Icon>
+                    <MenuItem Header="_Recent" x:Name="recent_jobs_menu" Background="#fff" BorderThickness="0" Padding="0 6">
+                        <MenuItem.Icon>
+                            <Image Source="Images/clock_icon.png" />
+                        </MenuItem.Icon>
+                    </MenuItem>
+                    <MenuItem Header="_New Window" Click="Open_Menu_Click" Background="#fff" BorderThickness="0" Padding="0 6" Tag="new" />
+                    <MenuItem Header="_This Window" Click="Open_Menu_Click" Background="#fff" BorderThickness="0" Padding="0 6" Tag="this" />
+                </MenuItem>
+                <MenuItem Header="_Save" x:Name="save_menu" Click="Save_Menu_Click" Background="#fff" BorderThickness="0" Padding="0 6" InputGestureText="Ctrl+S">
+                    <MenuItem.Icon>
+                        <Image Source="Images/save_icon.png" />
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="Auto Save" StaysOpenOnClick="True" IsChecked="{Binding Path=AutoSave, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Click="AutoSave_Click" x:Name="autoSave_menu" IsCheckable="True" Background="#fff" BorderThickness="0" Padding="0 6" />
+                <Separator />
+                <MenuItem Header="_Exit" Click="Close_Window" Background="#fff" BorderThickness="0" Padding="0 6" InputGestureText="Ctrl+Q">
+                    <MenuItem.Icon>
+                        <Image Source="Images/error_icon.png" />
+                    </MenuItem.Icon>
+                </MenuItem>
+            </MenuItem>
+            <MenuItem Header="_Edit">
+                <MenuItem Header="_Structure Order" Click="Edit_StructureOrder_Click" Background="#fff" BorderThickness="0" Padding="0 6" />
+                <MenuItem Header="Default Mistype Values" Background="#fff" BorderThickness="0" Padding="0 6" />
+                <MenuItem Header="_Remarks Document" Click="Edit_RemarksDocument_Menu_Click" Background="#fff" BorderThickness="0" Padding="0 6" />
+                <MenuItem Header="_Specification Requirements" Click="Edit_SpecificationRequirements_Menu_Click" Background="#fff" BorderThickness="0" Padding="0 6" />
+            </MenuItem>
+            <MenuItem Header="_View">
+                <MenuItem Header="_Jobs" Background="#fff" BorderThickness="0" Padding="0 6">
+                    <MenuItem Header="_Recent" Background="#fff" BorderThickness="0" Padding="0 6" />
+                    <MenuItem Header="_Select Range" Background="#fff" BorderThickness="0" Padding="0 6" />
+                </MenuItem>
+                <MenuItem Header="_Notes" Click="View_Notes_Click" Background="#fff" BorderThickness="0" Padding="0 6" />
+            </MenuItem>
+            <MenuItem Header="_Create">
+                <MenuItem Header="Hard Copy" Click="Create_Hard_Copy_Async" Background="#fff" BorderThickness="0" Padding="0 6" />
+                <MenuItem Header="Test Report" Click="Create_Test_Report_Async" Background="#fff" BorderThickness="0" Padding="0 6" />
+            </MenuItem>
+        </Menu>
+        <!--#endregion Menu-->
+
+        <!--#region PTL Logo Header-->
+        <Border DockPanel.Dock="Top" Height="60" Background="#337ab7">
+            <Image Source="Images/ptl_logo.png" Stretch="None" Height="Auto" />
+        </Border>
+        <!--#endregion PTL Logo Header-->
+
+        <!--#region Current Job & Toggle Form -->
+        <Border DockPanel.Dock="Top" BorderBrush="#337ab7" BorderThickness="0 0 0 .4" Margin="12 0" Padding="0 0 0 4">
+            <Grid Margin="12 0" VerticalAlignment="Bottom">
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Stretch">
+                    <TextBlock Text="{Binding Path=AutoSaveLabel, Mode=Default, UpdateSourceTrigger=PropertyChanged}"
+                               Foreground="{Binding Path=AutoSaveDecoration, Mode=Default, UpdateSourceTrigger=PropertyChanged}"
+                               FontWeight="SemiBold" Margin="0 0 24 0" />
+                    <TextBlock Text="Current Job: " />
+                    <TextBlock Text="{Binding Path=FormSet.CurrentJobTitle, Mode=Default, UpdateSourceTrigger=PropertyChanged}" FontWeight="SemiBold" />
+                    <TextBlock Text="{Binding Path=DueDateInfoLabel, Mode=Default, UpdateSourceTrigger=PropertyChanged}"
+                               Foreground="{Binding Path=DueDateInfoColor, Mode=Default, UpdateSourceTrigger=PropertyChanged}"
+                               Margin="24 0 0 0" />
+                    <Image Visibility="{Binding Path=ExpediteIconShow, Mode=Default, UpdateSourceTrigger=PropertyChanged}"
+                           Source="Images/danger_icon.png" Height="25" Width="25" Margin="0 -5 0 -6"  />
+                </StackPanel>
+                <Button x:Name="toggle_form_btn" HorizontalAlignment="Right" VerticalAlignment="Center" Click="Toggle_Form">
+                    <Image Source="Images/down_icon.png" Height="20" x:Name="arrow_img" />
+                </Button>
+            </Grid>
+        </Border>
+        <!--#endregion  -->
+
+        <!--#region Measurement Zoom -->
+        <Canvas x:Name="zoom_canvas" Margin="4 -4 0 0" DockPanel.Dock="Top" Visibility="Collapsed" Panel.ZIndex="1" VerticalAlignment="Center">
+            <Border Height="180" Background="White" BorderBrush="DarkGray" BorderThickness="2">
+                <Grid x:Name="zoom_grid" KeyDown="Job_Grid_KeyDown">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <!--<ColumnDefinition Width="*" />-->
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="4" Orientation="Horizontal" Margin="12 0 0 0" VerticalAlignment="Center">
+                        <TextBlock Text="Loc:" FontSize="16" Foreground="Red" FontWeight="Medium" Padding="2" />
+                        <TextBlock x:Name="locZoom" FontSize="16" Foreground="Red" Padding="2" />
+                        <TextBlock Text="S/N:" FontSize="16" FontWeight="Medium" Padding="10 2 2 2" />
+                        <TextBlock x:Name="snZoom" FontSize="16" Padding="2" />
+                    </StackPanel>
+                    <TextBlock x:Name="structureZoom" Grid.Row="0" Grid.Column="4" Grid.ColumnSpan="6" VerticalAlignment="Center" FontSize="24" />
+
+                    <Button Grid.Column="13" Grid.Row="0" Background="White" BorderThickness="0" Height="30" HorizontalAlignment="Right" Click="MeasurementRow_Zoom_Close_Click" Cursor="Hand">
+                        <Image Source="Images/error_icon.png" />
+                    </Button>
+
+                    <Grid Grid.Row="1" Grid.RowSpan="2" Grid.Column="0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Row="0">
+                            <Button Click="Prev_Zoom_Click">
+                                <Image Source="Images/up_icon.png" Height="30" />
+                            </Button>
+                            <TextBlock Text="Prev" HorizontalAlignment="Center" />
+                        </StackPanel>
+                        <StackPanel Grid.Row="1" VerticalAlignment="Bottom">
+                            <TextBlock Text="Next" HorizontalAlignment="Center" />
+                            <Button Click="Next_Zoom_Click">
+                                <Image Source="Images/down_icon.png" Height="30" />
+                            </Button>
+                        </StackPanel>
+                    </Grid>
+
+                    <Border Grid.Row="1" Grid.Column="1" BorderBrush="DarkGray" BorderThickness="1" Background="White">
+                        <TextBlock Text="Hole Copper Plating (Avg)" TextWrapping="Wrap" TextAlignment="Center" Padding="2" />
+                    </Border>
+                    <Border Grid.Row="1" Grid.Column="2" BorderBrush="DarkGray" BorderThickness="1" Padding="2">
+                        <TextBlock Text="External Conductor Thickness After Plating" TextWrapping="Wrap" TextAlignment="Center" />
+                    </Border>
+                    <Border Grid.Row="1" Grid.Column="3" BorderBrush="DarkGray" BorderThickness="1" Padding="2">
+                        <TextBlock Text="Surface Clad Copper" TextWrapping="Wrap" TextAlignment="Center" />
+                    </Border>
+                    <!--<Border Grid.Row="1" Grid.Column="4" BorderBrush="DarkGray" BorderThickness="1" Padding="2">
+                        <TextBlock TextWrapping="Wrap" TextAlignment="Center">
+                                <Run>Selective Plate on Surface Foil</Run>
+                                <LineBreak />
+                                <Run FontSize="10">(if applicable)</Run>
+                        </TextBlock>
+                        --><!--<TextBlock TextWrapping="Wrap" TextAlignment="Center" >Surface<LineBreak/>Clad/Wrap Plating</TextBlock>--><!--
+                    </Border>-->
+                    <Border Grid.Row="1" Grid.Column="4" BorderBrush="DarkGray" BorderThickness="1" Padding="2">
+                        <TextBlock Text="Surface Wrap Copper" TextWrapping="Wrap" TextAlignment="Center" />
+                    </Border>
+                    <Border Grid.Row="1" Grid.Column="5" BorderBrush="DarkGray" BorderThickness="1" Padding="2">
+                        <TextBlock Text="Cap Copper Plating" TextWrapping="Wrap" TextAlignment="Center" />
+                    </Border>
+                    <Border Grid.Row="1" Grid.Column="6" BorderBrush="DarkGray" BorderThickness="1" Padding="2">
+                        <TextBlock Text="Internal Clad Copper" TextWrapping="Wrap" TextAlignment="Center" />
+                    </Border>
+                    <Border Grid.Row="1" Grid.Column="7" BorderBrush="DarkGray" BorderThickness="1" Padding="2">
+                        <TextBlock Text="Minimum Etchback" TextWrapping="Wrap" TextAlignment="Center" />
+                    </Border>
+                    <Border Grid.Row="1" Grid.Column="8" BorderBrush="DarkGray" BorderThickness="1" Padding="2">
+                        <TextBlock Text="Maximum Etchback" TextWrapping="Wrap" TextAlignment="Center" />
+                    </Border>
+                    <Border Grid.Row="1" Grid.Column="9" BorderBrush="DarkGray" BorderThickness="1" Padding="2">
+                        <TextBlock Text="Minimum Internal Annular Ring" TextWrapping="Wrap" TextAlignment="Center" />
+                    </Border>
+                    <Border Grid.Row="1" Grid.Column="10" BorderBrush="DarkGray" BorderThickness="1" Padding="2">
+                        <TextBlock Text="Minimum External Annular Ring" TextWrapping="Wrap" TextAlignment="Center" />
+                    </Border>
+                    <Border Grid.Row="1" Grid.Column="11" BorderBrush="DarkGray" BorderThickness="1" Padding="2">
+                        <TextBlock Text="Minimum Dielectric Layer Thickness" TextWrapping="Wrap" TextAlignment="Center" />
+                    </Border>
+                    <Border Grid.Row="1" Grid.Column="12" BorderBrush="DarkGray" BorderThickness="1 1 0 1" Padding="2">
+                        <TextBlock Text="Maximum Wicking" TextWrapping="Wrap" TextAlignment="Center" />
+                    </Border>
+
+                    <TextBox x:Name="hcpZoom" Grid.Row="2" LostFocus="Measurement_LostFocus" ContextMenu="{StaticResource measurement_menu}" Grid.Column="1" Padding="0 0 0 5" FontSize="24" TextWrapping="Wrap" TextAlignment="Center" VerticalContentAlignment="Bottom" AcceptsReturn="True" />
+                    <TextBox x:Name="hcpNoteZoom" Grid.Row="2" Visibility="Hidden" Tag="note" Grid.Column="1" MinWidth="15" Padding="-1 -2 -1 0" Background="AliceBlue" FontSize="14" TextAlignment="Center" VerticalAlignment="Top" HorizontalAlignment="Right" />
+
+                    <TextBox x:Name="extConZoom" Grid.Row="2" LostFocus="Measurement_LostFocus" ContextMenu="{StaticResource measurement_menu}" Grid.Column="2" Padding="0 0 0 5" FontSize="24" TextWrapping="Wrap" TextAlignment="Center" VerticalContentAlignment="Bottom" AcceptsReturn="True" />
+                    <TextBox x:Name="extConNoteZoom" Grid.Row="2" Visibility="Hidden" Tag="note" Grid.Column="2" MinWidth="15" Padding="-1 -2 -1 0" Background="AliceBlue" FontSize="14" TextAlignment="Center" VerticalAlignment="Top" HorizontalAlignment="Right" />
+
+                    <TextBox x:Name="sCladZoom" Grid.Row="2" LostFocus="Measurement_LostFocus" ContextMenu="{StaticResource measurement_menu}" Grid.Column="3" Padding="0 0 0 5" FontSize="24" TextWrapping="Wrap" TextAlignment="Center" VerticalContentAlignment="Bottom" AcceptsReturn="True" />
+                    <TextBox x:Name="sCladNoteZoom" Grid.Row="2" Visibility="Hidden" Tag="note" Grid.Column="3" MinWidth="15" Padding="-1 -2 -1 0" Background="AliceBlue" FontSize="14" TextAlignment="Center" VerticalAlignment="Top" HorizontalAlignment="Right" />
+
+                    <!--<TextBox x:Name="selPlateZoom" Grid.Row="2" LostFocus="Measurement_LostFocus" ContextMenu="{StaticResource measurement_menu}" Grid.Column="4" Padding="0 0 0 5" FontSize="24" TextWrapping="Wrap" TextAlignment="Center" VerticalContentAlignment="Bottom" AcceptsReturn="True" />
+                    <TextBox x:Name="selPlateNoteZoom" Grid.Row="2" Visibility="Hidden" Tag="note" Grid.Column="4" MinWidth="15" Padding="-1 -2 -1 0" Background="AliceBlue" FontSize="14" TextAlignment="Center" VerticalAlignment="Top" HorizontalAlignment="Right" />-->
+
+                    <TextBox x:Name="wrapZoom" Grid.Row="2" LostFocus="Measurement_LostFocus" ContextMenu="{StaticResource measurement_menu}" Grid.Column="4" Padding="0 0 0 5" FontSize="24" TextWrapping="Wrap" TextAlignment="Center" VerticalContentAlignment="Bottom" AcceptsReturn="True" />
+                    <TextBox x:Name="wrapNoteZoom" Grid.Row="2" Visibility="Hidden" Tag="note" Grid.Column="4" MinWidth="15" Padding="-1 -2 -1 0" Background="AliceBlue" FontSize="14" TextAlignment="Center" VerticalAlignment="Top" HorizontalAlignment="Right" />
+
+                    <TextBox x:Name="capZoom" Grid.Row="2" LostFocus="Measurement_LostFocus" ContextMenu="{StaticResource measurement_menu}" Grid.Column="5" Padding="0 0 0 5" FontSize="24" TextWrapping="Wrap" TextAlignment="Center" VerticalContentAlignment="Bottom" AcceptsReturn="True" />
+                    <TextBox x:Name="capNoteZoom" Grid.Row="2" Visibility="Hidden" Tag="note" Grid.Column="5" MinWidth="15" Padding="-1 -2 -1 0" Background="AliceBlue" FontSize="14" TextAlignment="Center" VerticalAlignment="Top" HorizontalAlignment="Right" />
+
+                    <TextBox x:Name="iCladZoom" Grid.Row="2" LostFocus="Measurement_LostFocus" ContextMenu="{StaticResource measurement_menu}" Grid.Column="6" Padding="0 0 0 5" FontSize="24" TextWrapping="Wrap" TextAlignment="Center" VerticalContentAlignment="Bottom" AcceptsReturn="True" />
+                    <TextBox x:Name="iCladNoteZoom" Grid.Row="2" Visibility="Hidden" Tag="note" Grid.Column="6" MinWidth="15" Padding="-1 -2 -1 0" Background="AliceBlue" FontSize="14" TextAlignment="Center" VerticalAlignment="Top" HorizontalAlignment="Right" />
+
+                    <TextBox x:Name="minEtchZoom" Grid.Row="2" LostFocus="Measurement_LostFocus" ContextMenu="{StaticResource measurement_menu}" Grid.Column="7" Padding="0 0 0 5" FontSize="24" TextWrapping="Wrap" TextAlignment="Center" VerticalContentAlignment="Bottom" AcceptsReturn="True" />
+                    <TextBox x:Name="minEtchNoteZoom" Grid.Row="2" Visibility="Hidden" Tag="note" Grid.Column="7" MinWidth="15" Padding="-1 -2 -1 0" Background="AliceBlue" FontSize="14" TextAlignment="Center" VerticalAlignment="Top" HorizontalAlignment="Right" />
+
+                    <TextBox x:Name="maxEtchZoom" Grid.Row="2" LostFocus="Measurement_LostFocus" ContextMenu="{StaticResource measurement_menu}" Grid.Column="8" Padding="0 0 0 5" FontSize="24" TextWrapping="Wrap" TextAlignment="Center" VerticalContentAlignment="Bottom" AcceptsReturn="True" />
+                    <TextBox x:Name="maxEtchNoteZoom" Grid.Row="2" Visibility="Hidden" Tag="note" Grid.Column="8" MinWidth="15" Padding="-1 -2 -1 0" Background="AliceBlue" FontSize="14" TextAlignment="Center" VerticalAlignment="Top" HorizontalAlignment="Right" />
+
+                    <TextBox x:Name="iRingZoom" Grid.Row="2" LostFocus="Measurement_LostFocus" ContextMenu="{StaticResource measurement_menu}" Grid.Column="9" Padding="0 0 0 5" FontSize="24" TextWrapping="Wrap" TextAlignment="Center" VerticalContentAlignment="Bottom" AcceptsReturn="True" />
+                    <TextBox x:Name="iRingNoteZoom" Grid.Row="2" Visibility="Hidden" Tag="note" Grid.Column="9" MinWidth="15" Padding="-1 -2 -1 0" Background="AliceBlue" FontSize="14" TextAlignment="Center" VerticalAlignment="Top" HorizontalAlignment="Right" />
+
+                    <TextBox x:Name="eRingZoom" Grid.Row="2" LostFocus="Measurement_LostFocus" ContextMenu="{StaticResource measurement_menu}" Grid.Column="10" Padding="0 0 0 5" FontSize="24" TextWrapping="Wrap" TextAlignment="Center" VerticalContentAlignment="Bottom" AcceptsReturn="True" />
+                    <TextBox x:Name="eRingNoteZoom" Grid.Row="2" Visibility="Hidden" Tag="note" Grid.Column="10" MinWidth="15" Padding="-1 -2 -1 0" Background="AliceBlue" FontSize="14" TextAlignment="Center" VerticalAlignment="Top" HorizontalAlignment="Right" />
+
+                    <TextBox x:Name="diZoom" Grid.Row="2" LostFocus="Measurement_LostFocus" ContextMenu="{StaticResource measurement_menu}" Grid.Column="11" Padding="0 0 0 5" FontSize="24" TextWrapping="Wrap" TextAlignment="Center" VerticalContentAlignment="Bottom" AcceptsReturn="True" />
+                    <TextBox x:Name="diNoteZoom" Grid.Row="2" Visibility="Hidden" Tag="note" Grid.Column="11" MinWidth="15" Padding="-1 -2 -1 0" Background="AliceBlue" FontSize="14" TextAlignment="Center" VerticalAlignment="Top" HorizontalAlignment="Right" />
+
+                    <TextBox x:Name="wickZoom" Grid.Row="2" LostFocus="Measurement_LostFocus" ContextMenu="{StaticResource measurement_menu}" Grid.Column="12" Padding="0 0 0 5" FontSize="24" TextWrapping="Wrap" TextAlignment="Center" VerticalContentAlignment="Bottom" AcceptsReturn="True" />
+                    <TextBox x:Name="wickNoteZoom" Grid.Row="2" Visibility="Hidden" Tag="note" Grid.Column="12" MinWidth="15" Padding="-1 -2 -1 0" Background="AliceBlue" FontSize="14" TextAlignment="Center" VerticalAlignment="Top" HorizontalAlignment="Right" />
+
+                </Grid>
+            </Border>
+        </Canvas>
+        <!--#endregion Measurement Zoom-->
+
+        <Grid x:Name="job_page" KeyDown="Job_Grid_KeyDown">
+            <Grid.RowDefinitions>
+                <!-- Job Information Row -->
+                <RowDefinition Height="Auto" />
+                <!-- Examination Information Row -->
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <!--#region Job Information Form -->
+            <Grid Grid.Row="0" Margin="20 8" x:Name="job_form" Visibility="Visible">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="2*" />
+                    <ColumnDefinition Width="2*" />
+                    <ColumnDefinition Width="3*" />
+                    <ColumnDefinition Width="2*" />
+                </Grid.ColumnDefinitions>
+
+                <Grid Grid.ColumnSpan="4">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="5*" />
+                        <ColumnDefinition Width="2*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Testing Performed On -->
+                    <StackPanel Orientation="Horizontal" Margin="4">
+                        <TextBlock Text="Testing Performed On:" FontSize="16" />
+                        <StackPanel Margin="24 0 0 0">
+                            <RadioButton Checked="Testing_Performed_On_Checked" IsChecked="{Binding Path=FormSet.Coupons, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" GroupName="testing_performed_on" x:Name="coupons_input" VerticalContentAlignment="Center" Content="Coupons" FontSize="14" Height="25" />
+                            <RadioButton Checked="Testing_Performed_On_Checked" IsChecked="{Binding Path=FormSet.BareBoards, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" GroupName="testing_performed_on" x:Name="bare_boards_input" VerticalContentAlignment="Center" Content="Bare Boards" FontSize="14" Height="25" />
+                        </StackPanel>
+                        <StackPanel Margin="24 0 0 0">
+                            <StackPanel Orientation="Horizontal">
+                                <RadioButton Checked="Testing_Performed_On_Checked" IsChecked="{Binding Path=FormSet.CustomerMounts, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" GroupName="testing_performed_on" x:Name="customer_mounts_input" VerticalContentAlignment="Center" Content="Customer Mounts/Quantity" FontSize="14" Margin="0 0 4 0" />
+                                <TextBox Text="{Binding Path=FormSet.CustomerMountQty, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" x:Name="customer_mounts_qty_input" Width="25" Height="25" Padding="2" FontSize="14" />
+                            </StackPanel>
+                            <RadioButton Checked="Testing_Performed_On_Checked" IsChecked="{Binding Path=FormSet.AssembledBoards, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" GroupName="testing_performed_on" x:Name="assembled_boards_input" VerticalContentAlignment="Center" Content="Assembled Boards" FontSize="14" Height="25" />
+                        </StackPanel>
+                        <StackPanel Margin="24 0 0 0">
+                            <RadioButton Checked="Testing_Performed_On_Checked" IsChecked="{Binding Path=FormSet.Class2Assessment, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" GroupName="testing_performed_on" x:Name="class2_assessment_input" VerticalContentAlignment="Center" Content="Class 2 Visual Assessment" FontSize="14" Height="25" />
+                            <TextBlock Text="of External Annular Ring" FontSize="14" Margin="20 0 0 0" />
+                        </StackPanel>
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" Margin="12 4">
+                        <TextBlock Text="Date Tested" FontSize="16" Margin="4" />
+                        <!-- Date (Tested) -->
+                        <DatePicker SelectedDate="{Binding Path=FormSet.DateTested, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" x:Name="date_tested_input" Padding="2" Height="25" FontSize="14" />
+                    </StackPanel>
+                    <StackPanel Grid.Column="2" Margin="12 4">
+                        <TextBlock Text="Tested By" FontSize="16" Margin="4" />
+                        <!-- Tested By -->
+                        <TextBox Text="{Binding Path=FormSet.TestedBy, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" x:Name="tested_by_input" Padding="2" Height="25" FontSize="14" CharacterCasing="Upper" MaxLength="2" />
+                    </StackPanel>
+                    <StackPanel Grid.Column="3" Margin="12 4">
+                        <TextBlock Text="Checked By" FontSize="16" Margin="4" />
+                        <!-- Checked By -->
+                        <TextBox Text="{Binding Path=FormSet.CheckedBy, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" x:Name="checked_by_input" Padding="2" Height="25" FontSize="14" CharacterCasing="Upper" MaxLength="2" />
+                    </StackPanel>
+                </Grid>
+                <StackPanel Grid.Row="1" Grid.Column="0" Margin="12 4" >
+                    <TextBlock Text="Work Order Number" FontSize="16" Margin="4" />
+                    <StackPanel Orientation="Horizontal">
+                        <!-- Work Order Number -->
+                        <TextBox Text="{Binding Path=FormSet.WorkOrderNo, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                 Width="80" x:Name="wo_number_input" Height="25" Padding="2" FontSize="14"
+                                 TextChanged="Check_Work_Order_Log" LostFocus="WorkOrder_LostFocus" />
+                        <Label Content="-"  FontSize="16" />
+                        <TextBox Text="{Binding Path=FormSet.WorkOrderNoDash, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                 Width="20" Height="25" Padding="2" FontSize="14" x:Name="wo_number_dash_input"
+                                 TextChanged="Check_Work_Order_Log" LostFocus="WorkOrder_LostFocus" />
+                        <Image x:Name="wo_check_icon" Visibility="Hidden" Source="Images/warning_icon.png" Height="30" Width="30" VerticalAlignment="Center" Margin="8 0">
+                            <Image.ToolTip>
+                                <TextBlock Text="WARNING: You have entered a work order number that already exists!" />
+                            </Image.ToolTip>
+                        </Image>
+                    </StackPanel>
+                </StackPanel>
+                <!--<Button Grid.Row="1" Grid.Column="0" x:Name="job_info_btn" Click="Get_Work_Order_Info" Content="Get Work Order Info" MinWidth="160" MinHeight="40" FontSize="14" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0 0 25 4" />-->
+                <StackPanel Grid.Row="2" Grid.Column="0" Margin="12 4">
+                    <TextBlock Text="Part Number" FontSize="16" Margin="4" />
+                    <!-- Part Number -->
+                    <TextBox Text="{Binding Path=FormSet.PartNumber, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" x:Name="part_number_input" Padding="2" Height="25" FontSize="14" />
+                </StackPanel>
+                <StackPanel Grid.Row="3" Grid.Column="0" Margin="12 4">
+                    <TextBlock Text="Lot Number/Job Number/Work Order" FontSize="16" Margin="4" />
+                    <!-- Lot Number/Job Number/Work Order -->
+                    <TextBox Text="{Binding Path=FormSet.LotNumber, UpdateSourceTrigger=PropertyChanged}" x:Name="lot_number_input" Padding="2" Height="25" FontSize="14" />
+                </StackPanel>
+
+                <StackPanel Grid.Row="1" Grid.Column="1" Margin="12 4">
+                    <TextBlock Text="Customer" FontSize="16" Margin="4" />
+                    <!-- Customer -->
+                    <ComboBox Text="{Binding Path=FormSet.Customer, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" x:Name="customer_input" Padding="2" Height="25" FontSize="14" IsEditable="True"></ComboBox>
+                </StackPanel>
+                <StackPanel Grid.Row="2" Grid.Column="1" Margin="12 4">
+                    <TextBlock Text="Date Code" FontSize="16" Margin="4" />
+                    <!-- Date Code -->
+                    <TextBox Text="{Binding Path=FormSet.DateCode, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" x:Name="date_code_input" Padding="2" Height="25" FontSize="14" />
+                </StackPanel>
+
+                <StackPanel Grid.Row="1" Grid.Column="2" Margin="12 4">
+                    <TextBlock Text="Specification (Rev/Class/Amd)" FontSize="16" Margin="4" />
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Specification (1) -->
+                        <ComboBox Text="{Binding Path=FormSet.Specification1, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" x:Name="spec1_input" Grid.Column="0" Padding="2" Height="25" FontSize="14" IsEditable="True"></ComboBox>
+                        <!--<TextBox x:Name="spec1_input" Padding="2" Height="25" FontSize="14" />-->
+                        <TextBlock Grid.Column="1" Text="/" FontSize="16" Margin="8 0" />
+                        <!--Specification (2)-->
+                        <ComboBox Text="{Binding Path=FormSet.Specification2, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" x:Name="spec2_input" Grid.Column="2" Padding="2" Height="25" FontSize="14" IsEditable="True"></ComboBox>
+                        <!--<TextBox x:Name="spec2_input" Padding="2" Height="25" FontSize="14" Grid.Column="2" />-->
+                    </Grid>
+                </StackPanel>
+                <Button Grid.Row="1" Grid.Column="3" x:Name="spec_req_btn" Content="Get Spec Requirements" Click="Get_Spec_Requirements" MinWidth="175" MinHeight="40" FontSize="14" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="24 0 0 4" />
+                <StackPanel Grid.Row="2" Grid.Column="2" Margin="12 4">
+                    <StackPanel Orientation="Horizontal">
+                        <StackPanel Margin="0 0 24 0">
+                            <TextBlock Text="Board Type/Material" FontSize="16" Margin="4" />
+                            <!-- Board Type/Material -->
+                            <TextBox Text="{Binding Path=FormSet.BoardType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" x:Name="board_type_input" Padding="2" Height="25" FontSize="14" />
+                        </StackPanel>
+                        <StackPanel Margin="0 0 24 0">
+                            <TextBlock Text="PTL Test Procedure" FontSize="16" Margin="4" />
+                            <!-- PTL Test Procedure -->
+                            <TextBox Text="{Binding Path=FormSet.TestProcedure, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" x:Name="test_procedure_input" Padding="2" Height="25" FontSize="14" CharacterCasing="Upper" />
+                        </StackPanel>
+                        <StackPanel>
+                            <TextBlock Text="Drawing Provided" FontSize="16" Margin="4" />
+                            <!-- Drawing Provided -->
+                            <CheckBox IsChecked="{Binding Path=FormSet.DrawingProvided, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" x:Name="drawing_provided_input" Content="Yes" FontSize="16" VerticalContentAlignment="Center" />
+                        </StackPanel>
+                    </StackPanel>
+                </StackPanel>
+                <Grid Grid.Row="3" Grid.Column="2" Grid.ColumnSpan="2">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="3*" />
+                        <ColumnDefinition Width="3*" />
+                        <ColumnDefinition Width="2*" />
+                        <ColumnDefinition Width="2*" />
+                        <ColumnDefinition Width="2*" />
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Row="0" Grid.Column="0" Margin="12 4">
+                        <TextBlock Text="Evaluated As Polished By" FontSize="16" Margin="4" />
+                        <!-- Evalutated as Polished -->
+                        <TextBox Text="{Binding Path=FormSet.EvaluatedBy, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" x:Name="evaluated_by_input" Padding="2" Height="25" FontSize="14" />
+                    </StackPanel>
+                    <StackPanel Grid.Row="0" Grid.Column="1" Margin="12 4">
+                        <TextBlock Text="Date Evaluated" FontSize="16" Margin="4" />
+                        <!-- Date (Evaluated) -->
+                        <DatePicker SelectedDate="{Binding Path=FormSet.DateEvaluated, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  x:Name="date_evaluated_input" Padding="2" Height="25" FontSize="14" />
+                    </StackPanel>
+                    <StackPanel x:Name="bake_info_sp" Orientation="Horizontal" Grid.Row="0" Grid.Column="2" Grid.ColumnSpan="3">
+                        <StackPanel Margin="12 4">
+                            <TextBlock Text="Bake Time In" FontSize="16" Margin="4" />
+                            <!-- Bake Time In -->
+                            <TextBox Text="{Binding Path=FormSet.BakeTimeIn, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" x:Name="bake_time_in_input" Padding="2" Height="25" Width="120" FontSize="14" />
+                        </StackPanel>
+                        <StackPanel Margin="12 4">
+                            <TextBlock Text="Bake Time Out" FontSize="16" Margin="4" />
+                            <!-- Back Time Out -->
+                            <TextBox Text="{Binding Path=FormSet.BakeTimeOut, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" x:Name="bake_time_out_input" Padding="2" Height="25" Width="120" FontSize="14" />
+                        </StackPanel>
+                        <StackPanel Margin="12 4">
+                            <TextBlock Text="Total Time (Hrs)" FontSize="16" Margin="4" />
+                            <!-- Total Time -->
+                            <TextBox Text="{Binding Path=FormSet.TotalTime, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" x:Name="total_time_input" Padding="2" Height="25" Width="75" FontSize="14" />
+                        </StackPanel>
+                    </StackPanel>
+                </Grid>
+            </Grid>
+            <!--#endregion-->
+
+            <!--#region Examination Information -->
+            <Grid Grid.Row="1" Margin="8 12 12 12" x:Name="exam_info">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <!-- Required Examination Titles Row -->
+                    <RowDefinition Height="Auto" />
+                    <!-- Data Row -->
+                    <RowDefinition Height="*" />
+                    <!-- Requirements Row -->
+                    <RowDefinition Height="Auto" />
+                    <!-- Remarks Row -->
+                    <RowDefinition Height="Auto" />
+                    <!-- Saved Info Row -->
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="55" />
+                    <ColumnDefinition Width="5*" />
+                    <ColumnDefinition Width="5*" />
+                    <ColumnDefinition Width="4*" />
+                    <ColumnDefinition Width="17" />
+                </Grid.ColumnDefinitions>
+
+                <!--#region Data Grid Header Titles -->
+                <TextBlock Grid.Column="1" Grid.ColumnSpan="3" TextDecorations="Underline" Text="Metallographic Examination" FontSize="24" HorizontalAlignment="Center" Margin="0 0 0 12" />
+
+                <Grid Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3" x:Name="test_condition_grid">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Orientation="Horizontal" Grid.Column="0" Background="Yellow" Margin="0 0 120 0">
+                        <TextBlock Text="Condition: " FontSize="18" Padding="12 2" VerticalAlignment="Center" />
+                        <!-- As Received / Thermal Stress -->
+                        <ComboBox SelectedItem="{Binding Path=FormSet.TestConditionSelection, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Height="25" FontSize="14" MinWidth="200" SelectionChanged="Condition_Selected" x:Name="condition_input">
+                            <ComboBoxItem Content="As Received" Tag="AR" />
+                            <ComboBoxItem Content="After Thermal Stress" Tag="TS" />
+                        </ComboBox>
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" x:Name="thermal_info">
+                        <TextBlock Text="Test Temp:" FontSize="18" />
+                        <!-- Test Tempurature -->
+                        <TextBox Text="{Binding Path=FormSet.TestTemp, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" x:Name="temp_input" Padding="2" Height="25" Width="50" FontSize="14" Margin="8 0 4 0" />
+                        <TextBlock Text="&#186;F" FontSize="18" />
+                        <TextBlock Text="-" FontSize="18" Margin="12 0" />
+                        <TextBlock Text="# of Solder Floats:" FontSize="18" />
+                        <!-- Solder Floats -->
+                        <TextBox Text="{Binding Path=FormSet.SolderFloats, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" x:Name="solder_floats_input" Padding="2" Height="25" Width="30" FontSize="14" Margin="8 0 4 0" />
+                        <TextBlock Text="x" FontSize="18" />
+                    </StackPanel>
+                    <TextBlock Grid.Column="2" Text="Observations" FontSize="18" HorizontalAlignment="Center" />
+                </Grid>
+                
+                <!--#endregion-->
+
+                <!--#region Required Examination Titles -->
+                <Grid Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="3" Margin="0 12 0 0">
+                    <Grid.ColumnDefinitions>
+                        <!-- Measurement Titles Row -->
+                        <ColumnDefinition Width="5*" />
+                        <!-- Observation Titles Row -->
+                        <ColumnDefinition Width="2*" />
+                    </Grid.ColumnDefinitions>
+
+                    <!--#region Measurement Titles -->
+                    <Grid Grid.Column="0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <Border BorderBrush="DarkGray" BorderThickness="1">
+                            <TextBlock Text="Coupon Identification" TextWrapping="Wrap" TextAlignment="Center" Padding="2" />
+                        </Border>
+                        <Border Grid.Column="1" BorderBrush="DarkGray" BorderThickness="1">
+                            <TextBlock Text="Hole Copper Plating (Avg)" TextWrapping="Wrap" TextAlignment="Center" Padding="2" />
+                        </Border>
+                        <Border Grid.Column="2" BorderBrush="DarkGray" BorderThickness="1" Padding="2">
+                            <TextBlock Text="External Conductor Thickness After Plating" TextWrapping="Wrap" TextAlignment="Center" />
+                        </Border>
+                        <Border Grid.Column="3" BorderBrush="DarkGray" BorderThickness="1" Padding="2">
+                            <TextBlock Text="Surface Clad/Foil Copper" TextWrapping="Wrap" TextAlignment="Center" />
+                        </Border>
+                        <!--<Border Grid.Column="4" BorderBrush="DarkGray" BorderThickness="1" Padding="2">
+                            <TextBlock TextWrapping="Wrap" TextAlignment="Center">
+                                <Run>Selective Plate on Surface Foil</Run>
+                                <LineBreak />
+                                <Run FontSize="10">(if applicable)</Run>
+                            </TextBlock>
+                            --><!--<TextBlock TextWrapping="Wrap" TextAlignment="Center" >Surface<LineBreak/>Clad/Wrap Plating</TextBlock>--><!--
+                        </Border>-->
+                        <Border Grid.Column="4" BorderBrush="DarkGray" BorderThickness="1" Padding="2">
+                            <TextBlock Text="Surface Wrap Copper" TextWrapping="Wrap" TextAlignment="Center" />
+                        </Border>
+                        <Border Grid.Column="5" BorderBrush="DarkGray" BorderThickness="1" Padding="2">
+                            <TextBlock Text="Cap Copper Plating" TextWrapping="Wrap" TextAlignment="Center" />
+                        </Border>
+                        <Border Grid.Column="6" BorderBrush="DarkGray" BorderThickness="1" Padding="2">
+                            <TextBlock Text="Internal Clad Copper" TextWrapping="Wrap" TextAlignment="Center" />
+                        </Border>
+                        <Border Grid.Column="7" BorderBrush="DarkGray" BorderThickness="1" Padding="2">
+                            <TextBlock Text="Minimum Etchback" TextWrapping="Wrap" TextAlignment="Center" />
+                        </Border>
+                        <Border Grid.Column="8" BorderBrush="DarkGray" BorderThickness="1" Padding="2">
+                            <TextBlock Text="Maximum Etchback" TextWrapping="Wrap" TextAlignment="Center" />
+                        </Border>
+                        <Border Grid.Column="9" BorderBrush="DarkGray" BorderThickness="1" Padding="2">
+                            <TextBlock Text="Minimum Internal Annular Ring" TextWrapping="Wrap" TextAlignment="Center" />
+                        </Border>
+                        <Border Grid.Column="10" BorderBrush="DarkGray" BorderThickness="1" Padding="2">
+                            <TextBlock Text="Minimum External Annular Ring" TextWrapping="Wrap" TextAlignment="Center" />
+                        </Border>
+                        <Border Grid.Column="11" BorderBrush="DarkGray" BorderThickness="1" Padding="2">
+                            <TextBlock Text="Minimum Dielectric Layer Thickness" TextWrapping="Wrap" TextAlignment="Center" />
+                        </Border>
+                        <Border Grid.Column="12" BorderBrush="DarkGray" BorderThickness="1 1 3 1" Padding="2">
+                            <TextBlock Text="Maximum Wicking" TextWrapping="Wrap" TextAlignment="Center" />
+                        </Border>
+                    </Grid>
+                    <!--#endregion-->
+
+                    <!--#region Observation Titles -->
+                    <Grid Grid.Column="1">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                            <!--<ColumnDefinition Width="*" />-->
+                        </Grid.ColumnDefinitions>
+
+                        <Border Grid.Column="0" BorderBrush="DarkGray" BorderThickness="1" Padding="2">
+                            <TextBlock Text="Inner-layer Sep." TextWrapping="Wrap" TextAlignment="Center" />
+                        </Border>
+                        <Border Grid.Column="1" BorderBrush="DarkGray" BorderThickness="1" Padding="2">
+                            <TextBlock Text="Plating Cracks" TextWrapping="Wrap" TextAlignment="Center" />
+                        </Border>
+                        <Border Grid.Column="2" BorderBrush="DarkGray" BorderThickness="1" Padding="2">
+                            <TextBlock Text="Copper Plating Voids" TextWrapping="Wrap" TextAlignment="Center" />
+                        </Border>
+                        <!--<Border Grid.Column="3" BorderBrush="DarkGray" BorderThickness="1" Padding="2">
+                            <TextBlock Text="Foil Crack" TextWrapping="Wrap" TextAlignment="Center" />
+                        </Border>-->
+                        <Border Grid.Column="3" BorderBrush="DarkGray" BorderThickness="1" Padding="2">
+                            <TextBlock Text="Delam/Blisters" TextWrapping="Wrap" TextAlignment="Center" />
+                        </Border>
+                        <Border Grid.Column="4" BorderBrush="DarkGray" BorderThickness="1" Padding="2">
+                            <TextBlock Text="Laminate Voids/Cracks" TextWrapping="Wrap" TextAlignment="Center" />
+                        </Border>
+                        <Border Grid.Column="5" BorderBrush="Black" BorderThickness="1" Padding="2">
+                            <TextBlock Text="Accept  or   Reject" TextWrapping="Wrap" TextAlignment="Center" />
+                        </Border>
+                    </Grid>
+                    <!--#endregion-->
+
+                </Grid>
+                <!--#endregion-->
+
+                <!--#region Recorded Data -->
+                <ScrollViewer Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="5">
+                    <Grid x:Name="complete_grid">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="55" />
+                            <ColumnDefinition Width="5*" />
+                            <ColumnDefinition Width="2*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <!--#region Coupon User Options -->
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Top">
+                            <Button x:Name="remove_exam_grid_btn" Height="25" Width="25" Click="Remove_Exam_Grid" Margin="0 0 3 0">
+                                <Image Source="Images/remove_icon.png" />
+                                <Button.ToolTip>
+                                    <TextBlock Text="Remove the last structure title section and any data rows it contains." />
+                                </Button.ToolTip>
+                            </Button>
+                            <Button x:Name="add_exam_grid_btn" Height="25" Width="25" Click="Add_Exam_Grid" ContextMenu="{StaticResource set_data_row_menu}">
+                                <Image Source="Images/add_icon.png" />
+                                <Button.ToolTip>
+                                    <TextBlock Text="Add a new structure title section." />
+                                </Button.ToolTip>
+                            </Button>
+                        </StackPanel>
+                        <StackPanel Grid.Row="1" Orientation="Horizontal" VerticalAlignment="Top">
+                            <Button x:Name="remove_grid_0" Height="25" Width="25" Click="Remove_Data_Row" Margin="0 0 3 0" Tag="0">
+                                <Image Source="Images/remove_icon.png" />
+                                <Button.ToolTip>
+                                    <TextBlock Text="Remove the last data row within the current structure section." />
+                                </Button.ToolTip>
+                            </Button>
+                            <Button x:Name="add_grid_0" Height="25" Width="25" Click="Add_Data_Row" Tag="0">
+                                <Image Source="Images/add_icon.png" />
+                                <Button.ToolTip>
+                                    <TextBlock Text="Add a new data row within the current structure section." />
+                                </Button.ToolTip>
+                            </Button>
+                        </StackPanel>
+                        <!--#endregion-->
+
+                        <!--#region Coupon Structure Title -->
+                        <TextBox Text="{Binding Path=StructureTitles[0].StructureTitle, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" LostFocus="Structure_Title_LostFocus" x:Name="struct_0" Grid.Column="1" Grid.ColumnSpan="3" TextAlignment="Center" FontSize="20" Padding="6" BorderThickness="1 0" />
+                        <!--#endregion-->
+
+                        <!--#region Measurements -->
+                        <Grid Grid.Row="1" Grid.Column="1" x:Name="m_grid_0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                                <!--<ColumnDefinition Width="*" />-->
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+
+                            <Border BorderBrush="DarkGray" BorderThickness="1" Background="#eee">
+                                <StackPanel Margin="1 0">
+                                    <StackPanel Orientation="Horizontal" Margin="0 1">
+                                        <TextBlock Text="loc " Padding="3" Foreground="Red" />
+                                        <TextBox Text="{Binding Path=RecordSet[0].Location, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="55" Padding="1" FontSize="12"  Foreground="Red"
+                                                 LostFocus="SN_Location_Change"/>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="S/N " Padding="1" />
+                                        <TextBox Text="{Binding Path=RecordSet[0].SerialNumber, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="55" Padding="1" FontSize="12"
+                                                 LostFocus="SN_Location_Change"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+
+                            <TextBox Text="{Binding Path=RecordSet[0].HoleCuPlating.Measurement, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Background="{Binding Path=RecordSet[0].HoleCuPlating.BackgroundColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ContextMenu="{StaticResource measurement_menu}" LostFocus="Measurement_LostFocus" Grid.Column="1" Height="48" Padding="0 0 0 5" FontSize="15" TextWrapping="Wrap" TextAlignment="Center" VerticalContentAlignment="Bottom" AcceptsReturn="True" />
+                            <TextBox Text="{Binding Path=RecordSet[0].HoleCuPlating.Note, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Visibility="{Binding Path=RecordSet[0].HoleCuPlating.NoteShow, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Tag="note" Grid.Column="1" MinWidth="15" Padding="-1 -2 -1 0" Background="AliceBlue" FontSize="10" TextAlignment="Center" VerticalAlignment="Top" HorizontalAlignment="Right" />
+
+                            <TextBox Text="{Binding Path=RecordSet[0].ExternalConductor.Measurement, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Background="{Binding Path=RecordSet[0].ExternalConductor.BackgroundColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ContextMenu="{StaticResource measurement_menu}" LostFocus="Measurement_LostFocus" Grid.Column="2" Height="48" Padding="0 0 0 5" FontSize="15" TextWrapping="Wrap" TextAlignment="Center" VerticalContentAlignment="Bottom" AcceptsReturn="True" />
+                            <TextBox Text="{Binding Path=RecordSet[0].ExternalConductor.Note, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Visibility="{Binding Path=RecordSet[0].ExternalConductor.NoteShow, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Tag="note" Grid.Column="2" MinWidth="15" Padding="-1 -2 -1 0" Background="AliceBlue" FontSize="10" TextAlignment="Center" VerticalAlignment="Top" HorizontalAlignment="Right" />
+
+                            <TextBox Text="{Binding Path=RecordSet[0].SurfaceCladCu.Measurement, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Background="{Binding Path=RecordSet[0].SurfaceCladCu.BackgroundColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ContextMenu="{StaticResource measurement_menu}" LostFocus="Measurement_LostFocus" Grid.Column="3" Height="48" Padding="0 0 0 5" FontSize="15" TextWrapping="Wrap" TextAlignment="Center" VerticalContentAlignment="Bottom" AcceptsReturn="True" />
+                            <TextBox Text="{Binding Path=RecordSet[0].SurfaceCladCu.Note, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Visibility="{Binding Path=RecordSet[0].SurfaceCladCu.NoteShow, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Tag="note" Grid.Column="3" MinWidth="15" Padding="-1 -2 -1 0" Background="AliceBlue" FontSize="10" TextAlignment="Center" VerticalAlignment="Top" HorizontalAlignment="Right" />
+
+                            <!--<TextBox Text="{Binding Path=RecordSet[0].SelectivePlate.Measurement, Mode=TwoWay}" Background="{Binding Path=RecordSet[0].SelectivePlate.BackgroundColor, Mode=TwoWay}" ContextMenu="{StaticResource measurement_menu}" LostFocus="Measurement_LostFocus" Grid.Column="4" Height="48" Padding="0 0 0 5" FontSize="14" TextWrapping="Wrap" TextAlignment="Center" VerticalContentAlignment="Bottom" AcceptsReturn="True" />
+                            <TextBox Text="{Binding Path=RecordSet[0].SelectivePlate.Note, Mode=TwoWay}" Visibility="{Binding Path=RecordSet[0].SelectivePlate.NoteShow, Mode=TwoWay}" Tag="note" Grid.Column="4" MinWidth="15" Padding="-1 -2 -1 0" Background="AliceBlue" FontSize="10" TextAlignment="Center" VerticalAlignment="Top" HorizontalAlignment="Right" />-->
+
+                            <TextBox Text="{Binding Path=RecordSet[0].WrapCu.Measurement, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Background="{Binding Path=RecordSet[0].WrapCu.BackgroundColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ContextMenu="{StaticResource measurement_menu}" LostFocus="Measurement_LostFocus" Grid.Column="4" Height="48" Padding="0 0 0 5" FontSize="15" TextWrapping="Wrap" TextAlignment="Center" VerticalContentAlignment="Bottom" AcceptsReturn="True" />
+                            <TextBox Text="{Binding Path=RecordSet[0].WrapCu.Note, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Visibility="{Binding Path=RecordSet[0].WrapCu.NoteShow, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Tag="note" Grid.Column="4" MinWidth="15" Padding="-1 -2 -1 0" Background="AliceBlue" FontSize="10" TextAlignment="Center" VerticalAlignment="Top" HorizontalAlignment="Right" />
+
+                            <TextBox Text="{Binding Path=RecordSet[0].CapCu.Measurement, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Background="{Binding Path=RecordSet[0].CapCu.BackgroundColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ContextMenu="{StaticResource measurement_menu}" LostFocus="Measurement_LostFocus" Grid.Column="5" Height="48" Padding="0 0 0 5" FontSize="15" TextWrapping="Wrap" TextAlignment="Center" VerticalContentAlignment="Bottom" AcceptsReturn="True" />
+                            <TextBox Text="{Binding Path=RecordSet[0].CapCu.Note, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Visibility="{Binding Path=RecordSet[0].CapCu.NoteShow, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Tag="note" Grid.Column="5" MinWidth="15" Padding="-1 -2 -1 0" Background="AliceBlue" FontSize="10" TextAlignment="Center" VerticalAlignment="Top" HorizontalAlignment="Right" />
+
+                            <TextBox Text="{Binding Path=RecordSet[0].InternalCladCu.Measurement, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Background="{Binding Path=RecordSet[0].InternalCladCu.BackgroundColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ContextMenu="{StaticResource measurement_menu}" LostFocus="Measurement_LostFocus" Grid.Column="6" Height="48" Padding="0 0 0 5" FontSize="15" TextWrapping="Wrap" TextAlignment="Center" VerticalContentAlignment="Bottom" AcceptsReturn="True" />
+                            <TextBox Text="{Binding Path=RecordSet[0].InternalCladCu.Note, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Visibility="{Binding Path=RecordSet[0].InternalCladCu.NoteShow, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Tag="note" Grid.Column="6" MinWidth="15" Padding="-1 -2 -1 0" Background="AliceBlue" FontSize="10" TextAlignment="Center" VerticalAlignment="Top" HorizontalAlignment="Right" />
+
+                            <TextBox Text="{Binding Path=RecordSet[0].MinEtchback.Measurement, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Background="{Binding Path=RecordSet[0].MinEtchback.BackgroundColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ContextMenu="{StaticResource measurement_menu}" LostFocus="Measurement_LostFocus" Grid.Column="7" Height="48" Padding="0 0 0 5" FontSize="15" TextWrapping="Wrap" TextAlignment="Center" VerticalContentAlignment="Bottom" AcceptsReturn="True" />
+                            <TextBox Text="{Binding Path=RecordSet[0].MinEtchback.Note, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Visibility="{Binding Path=RecordSet[0].MinEtchback.NoteShow, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Tag="note" Grid.Column="7" MinWidth="15" Padding="-1 -2 -1 0" Background="AliceBlue" FontSize="10" TextAlignment="Center" VerticalAlignment="Top" HorizontalAlignment="Right" />
+
+                            <TextBox Text="{Binding Path=RecordSet[0].MaxEtchback.Measurement, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Background="{Binding Path=RecordSet[0].MaxEtchback.BackgroundColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ContextMenu="{StaticResource measurement_menu}" LostFocus="Measurement_LostFocus" Grid.Column="8" Height="48" Padding="0 0 0 5" FontSize="15" TextWrapping="Wrap" TextAlignment="Center" VerticalContentAlignment="Bottom" AcceptsReturn="True" />
+                            <TextBox Text="{Binding Path=RecordSet[0].MaxEtchback.Note, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Visibility="{Binding Path=RecordSet[0].MaxEtchback.NoteShow, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Tag="note" Grid.Column="8" MinWidth="15" Padding="-1 -2 -1 0" Background="AliceBlue" FontSize="10" TextAlignment="Center" VerticalAlignment="Top" HorizontalAlignment="Right" />
+
+                            <TextBox Text="{Binding Path=RecordSet[0].InternalAnnularRing.Measurement, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Background="{Binding Path=RecordSet[0].InternalAnnularRing.BackgroundColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ContextMenu="{StaticResource measurement_menu}" LostFocus="Measurement_LostFocus" Grid.Column="9" Height="48" Padding="0 0 0 5" FontSize="15" TextWrapping="Wrap" TextAlignment="Center" VerticalContentAlignment="Bottom" AcceptsReturn="True" />
+                            <TextBox Text="{Binding Path=RecordSet[0].InternalAnnularRing.Note, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Visibility="{Binding Path=RecordSet[0].InternalAnnularRing.NoteShow, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Tag="note" Grid.Column="9" MinWidth="15" Padding="-1 -2 -1 0" Background="AliceBlue" FontSize="10" TextAlignment="Center" VerticalAlignment="Top" HorizontalAlignment="Right" />
+
+                            <TextBox Text="{Binding Path=RecordSet[0].ExternalAnnularRing.Measurement, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Background="{Binding Path=RecordSet[0].ExternalAnnularRing.BackgroundColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ContextMenu="{StaticResource measurement_menu}" LostFocus="Measurement_LostFocus" Grid.Column="10" Height="48" Padding="0 0 0 5" FontSize="15" TextWrapping="Wrap" TextAlignment="Center" VerticalContentAlignment="Bottom" AcceptsReturn="True" />
+                            <TextBox Text="{Binding Path=RecordSet[0].ExternalAnnularRing.Note, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Visibility="{Binding Path=RecordSet[0].ExternalAnnularRing.NoteShow, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Tag="note" Grid.Column="10" MinWidth="15" Padding="-1 -2 -1 0" Background="AliceBlue" FontSize="10" TextAlignment="Center" VerticalAlignment="Top" HorizontalAlignment="Right" />
+
+                            <TextBox Text="{Binding Path=RecordSet[0].Dielectric.Measurement, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Background="{Binding Path=RecordSet[0].Dielectric.BackgroundColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ContextMenu="{StaticResource measurement_menu}" LostFocus="Measurement_LostFocus" Grid.Column="11" Height="48" Padding="0 0 0 5" FontSize="15" TextWrapping="Wrap" TextAlignment="Center" VerticalContentAlignment="Bottom" AcceptsReturn="True" />
+                            <TextBox Text="{Binding Path=RecordSet[0].Dielectric.Note, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Visibility="{Binding Path=RecordSet[0].Dielectric.NoteShow, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Tag="note" Grid.Column="11" MinWidth="15" Padding="-1 -2 -1 0" Background="AliceBlue" FontSize="10" TextAlignment="Center" VerticalAlignment="Top" HorizontalAlignment="Right" />
+
+                            <TextBox Text="{Binding Path=RecordSet[0].Wicking.Measurement, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Background="{Binding Path=RecordSet[0].Wicking.BackgroundColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ContextMenu="{StaticResource measurement_menu}" LostFocus="Measurement_LostFocus" Grid.Column="12" Height="48" Padding="0 0 0 5" FontSize="15" TextWrapping="Wrap" TextAlignment="Center" VerticalContentAlignment="Bottom" AcceptsReturn="True" BorderThickness="1 1 3 1" />
+                            <TextBox Text="{Binding Path=RecordSet[0].Wicking.Note, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Visibility="{Binding Path=RecordSet[0].Wicking.NoteShow, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Tag="note" Grid.Column="12" MinWidth="15" Padding="-1 -2 -1 0" Background="AliceBlue" FontSize="10" TextAlignment="Center" VerticalAlignment="Top" HorizontalAlignment="Right" />
+                        </Grid>
+                        <!--#endregion-->
+
+                        <!--#region Observations -->
+                        <Grid Grid.Row="1" Grid.Column="2" x:Name="o_grid_0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                                <!--<ColumnDefinition Width="*" />-->
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+
+                            <TextBox Text="{Binding Path=RecordSet[0].InnerlayerSeparation, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TextChanged="Observation_Input" Grid.Column="0" Height="48" Padding="0 0 0 5" FontSize="18" TextWrapping="Wrap" TextAlignment="Center" VerticalContentAlignment="Bottom" AcceptsReturn="True" Background="#f3f3f3" MaxLength="1" CharacterCasing="Upper" />
+                            <TextBox Text="{Binding Path=RecordSet[0].PlatingCrack, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TextChanged="Observation_Input" Grid.Column="1" Height="48" Padding="0 0 0 5" FontSize="18" TextWrapping="Wrap" TextAlignment="Center" VerticalContentAlignment="Bottom" AcceptsReturn="True" Background="#f3f3f3" MaxLength="1" CharacterCasing="Upper" />
+                            <TextBox Text="{Binding Path=RecordSet[0].PlatingVoid, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TextChanged="Observation_Input" Grid.Column="2" Height="48" Padding="0 0 0 5" FontSize="18" TextWrapping="Wrap" TextAlignment="Center" VerticalContentAlignment="Bottom" AcceptsReturn="True" Background="#f3f3f3" MaxLength="1" CharacterCasing="Upper" />
+                            <!--<TextBox Text="{Binding Path=RecordSet[0].FoilCrack, Mode=TwoWay}" TextChanged="Observation_Input" Grid.Column="3" Height="48" Padding="0 0 0 5" FontSize="14" TextWrapping="Wrap" TextAlignment="Center" VerticalContentAlignment="Bottom" AcceptsReturn="True" Background="#f3f3f3" MaxLength="1" CharacterCasing="Upper" />-->
+                            <TextBox Text="{Binding Path=RecordSet[0].DelamBlisters, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TextChanged="Observation_Input" Grid.Column="3" Height="48" Padding="0 0 0 5" FontSize="18" TextWrapping="Wrap" TextAlignment="Center" VerticalContentAlignment="Bottom" AcceptsReturn="True" Background="#f3f3f3" MaxLength="1" CharacterCasing="Upper" />
+                            <TextBox Text="{Binding Path=RecordSet[0].LaminateVoidCrack, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TextChanged="Observation_Input" Grid.Column="4" Height="48" Padding="0 0 0 5" FontSize="18" TextWrapping="Wrap" TextAlignment="Center" VerticalContentAlignment="Bottom" AcceptsReturn="True" Background="#f3f3f3" MaxLength="1" CharacterCasing="Upper" />
+                            <TextBox Text="{Binding Path=RecordSet[0].AcceptReject, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TextChanged="Observation_Input" Grid.Column="5" Height="48" Padding="0 0 0 5" FontSize="18" FontWeight="Medium" TextWrapping="Wrap" TextAlignment="Center" VerticalContentAlignment="Bottom" AcceptsReturn="True" Background="#f3f3f3" MaxLength="2" CharacterCasing="Upper" BorderBrush="Black" />
+                        </Grid>
+                        <!--#endregion-->
+
+                    </Grid>
+                </ScrollViewer>
+                <!--#endregion-->
+
+                <!--#region Requirements -->
+                <Grid Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="2" x:Name="requirements_grid">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <!--<ColumnDefinition Width="*" />-->
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="100" />
+                    </Grid.RowDefinitions>
+
+                    <Border BorderBrush="DarkGray" BorderThickness="1" Background="#EEECE1">
+                        <!--<TextBlock Text="Requirements" TextWrapping="Wrap" TextAlignment="Center" Padding="2" />-->
+                        <TextBlock TextWrapping="Wrap" TextAlignment="Center" Padding="2" FontSize="11" FontWeight="Medium" Foreground="Red">
+                                    Requirements
+                                    <LineBreak />
+                                    <LineBreak />
+                                    <Run Text="(All measurements are in inches)" FontSize="10" FontWeight="Normal" Foreground="Black" />
+                        </TextBlock>
+                    </Border>
+                    <TextBox Text="{Binding Path=Requirement.HoleCuPlating, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ContextMenu="{StaticResource requirement_menu}" LostFocus="Requirement_LostFocus" Tag="" x:Name="req1" Grid.Column="1" TextWrapping="Wrap" AcceptsReturn="True" TextAlignment="Center" Padding="2" VerticalContentAlignment="Top" FontSize="12" Background="#EEECE1" />
+                    <TextBox Text="{Binding Path=Requirement.ExternalConductor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ContextMenu="{StaticResource requirement_menu}" LostFocus="Requirement_LostFocus" Tag="" x:Name="req2" Grid.Column="2" TextWrapping="Wrap" AcceptsReturn="True" TextAlignment="Center" Padding="2" VerticalContentAlignment="Top" FontSize="12" Background="#EEECE1" />
+                    <TextBox Text="{Binding Path=Requirement.SurfaceCladCu, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ContextMenu="{StaticResource requirement_menu}" LostFocus="Requirement_LostFocus" Tag="" x:Name="req3" Grid.Column="3" TextWrapping="Wrap" AcceptsReturn="True" TextAlignment="Center" Padding="2" VerticalContentAlignment="Top" FontSize="12" Background="#EEECE1" />
+                    <!--<Border x:Name="req4" Grid.Column="4" Padding="2" BorderThickness="1" BorderBrush="DarkGray">
+                        <TextBlock Tag="4" TextWrapping="Wrap" TextAlignment="Center" Padding="2" FontSize="12">
+                                    N/A
+                                    <LineBreak />
+                                    <LineBreak />
+                                    <Run Text="(Applicable only on Vias w/ Cap)" FontSize="9" />
+                        </TextBlock>
+                    </Border>-->
+                    <TextBox Text="{Binding Path=Requirement.WrapCu, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ContextMenu="{StaticResource requirement_menu}" LostFocus="Requirement_LostFocus" Tag="" x:Name="req4" Grid.Column="4" TextWrapping="Wrap" AcceptsReturn="True" TextAlignment="Center" Padding="2" VerticalContentAlignment="Top" FontSize="12" Background="#EEECE1" />
+                    <TextBox Text="{Binding Path=Requirement.CapCu, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ContextMenu="{StaticResource requirement_menu}" LostFocus="Requirement_LostFocus" Tag="" x:Name="req5" Grid.Column="5" TextWrapping="Wrap" AcceptsReturn="True" TextAlignment="Center" Padding="2" VerticalContentAlignment="Top" FontSize="12" Background="#EEECE1" />
+                    <TextBox Text="{Binding Path=Requirement.InternalCladCu, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ContextMenu="{StaticResource requirement_menu}" LostFocus="Requirement_LostFocus" Tag="" x:Name="req6" Grid.Column="6" TextWrapping="Wrap" AcceptsReturn="True" TextAlignment="Center" Padding="2" VerticalContentAlignment="Top" FontSize="12" Background="#EEECE1" />
+                    <TextBox Text="{Binding Path=Requirement.MinEtchback, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ContextMenu="{StaticResource requirement_menu}" LostFocus="Requirement_LostFocus" Tag="" x:Name="req7" Grid.Column="7" TextWrapping="Wrap" AcceptsReturn="True" TextAlignment="Center" Padding="2" VerticalContentAlignment="Top" FontSize="12" Background="#EEECE1" />
+                    <TextBox Text="{Binding Path=Requirement.MaxEtchback, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ContextMenu="{StaticResource requirement_menu}" LostFocus="Requirement_LostFocus" Tag="" x:Name="req8" Grid.Column="8" TextWrapping="Wrap" AcceptsReturn="True" TextAlignment="Center" Padding="2" VerticalContentAlignment="Top" FontSize="12" Background="#EEECE1" />
+                    <TextBox Text="{Binding Path=Requirement.InternalAnnularRing, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ContextMenu="{StaticResource requirement_menu}" LostFocus="Requirement_LostFocus" Tag="" x:Name="req9" Grid.Column="9" TextWrapping="Wrap" AcceptsReturn="True" TextAlignment="Center" Padding="2" VerticalContentAlignment="Top" FontSize="12" Background="#EEECE1" />
+                    <TextBox Text="{Binding Path=Requirement.ExternalAnnularRing, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ContextMenu="{StaticResource requirement_menu}" LostFocus="Requirement_LostFocus" Tag="" x:Name="req10" Grid.Column="10" TextWrapping="Wrap" AcceptsReturn="True" TextAlignment="Center" Padding="2" VerticalContentAlignment="Top" FontSize="12" Background="#EEECE1" />
+                    <TextBox Text="{Binding Path=Requirement.Dielectric, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ContextMenu="{StaticResource requirement_menu}" LostFocus="Requirement_LostFocus" Tag="" x:Name="req11" Grid.Column="11" TextWrapping="Wrap" AcceptsReturn="True" TextAlignment="Center" Padding="2" VerticalContentAlignment="Top" FontSize="12" Background="#EEECE1" />
+                    <TextBox Text="{Binding Path=Requirement.Wicking, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ContextMenu="{StaticResource requirement_menu}" LostFocus="Requirement_LostFocus" Tag="" x:Name="req12" Grid.Column="12" TextWrapping="Wrap" AcceptsReturn="True" TextAlignment="Center" Padding="2" VerticalContentAlignment="Top" BorderThickness="1 1 3 1" FontSize="12" Background="#EEECE1" />
+                </Grid>
+
+                <Grid Grid.Row="4" Grid.Column="3">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="100" />
+                    </Grid.RowDefinitions>
+
+                    <Border BorderBrush="DarkGray" BorderThickness="1" Background="#EEECE1"></Border>
+                    <Border Grid.Column="1" BorderBrush="DarkGray" BorderThickness="1" Background="#EEECE1"></Border>
+                    <Border Grid.Column="2" BorderBrush="DarkGray" BorderThickness="1" Padding="2" Background="#EEECE1"></Border>
+                    <Border Grid.Column="3" BorderBrush="DarkGray" BorderThickness="1" Padding="2" Background="#EEECE1"></Border>
+                    <Border Grid.Column="4" BorderBrush="DarkGray" BorderThickness="1" Padding="2" Background="#EEECE1"></Border>
+                    <Border Grid.Column="5" BorderBrush="DarkGray" BorderThickness="1" Padding="2" Background="#EEECE1"></Border>
+                </Grid>
+                <!--#endregion-->
+
+                <!--#region Remarks -->
+                <Grid Grid.Row="5" Grid.ColumnSpan="5">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="55" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="54" />
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Grid.Column="1" Orientation="Horizontal">
+                        <TextBlock Text="Remarks:" FontSize="18" FontWeight="SemiBold" Padding="2 6 2 2" />
+                        <Button Click="View_Standard_Remarks" Height="20" Width="20" Background="#fff" BorderThickness="0" VerticalAlignment="Bottom" Margin="2 0 0 4">
+                            <Image Source="Images/search_icon.png" />
+                            <Button.ToolTip>
+                                <ToolTip FontSize="12" Padding="8">
+                                    <TextBlock Text="Search standard remarks document" />
+                                </ToolTip>
+                            </Button.ToolTip>
+                        </Button>
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" VerticalAlignment="Bottom">
+                        <Button x:Name="remove_remark_btn" Height="25" Width="25" Click="Remove_Remarks_Row" Margin="0 0 3 0">
+                            <Image Source="Images/remove_icon.png" />
+                        </Button>
+                        <Button x:Name="add_remark_btn" Height="25" Width="25" Click="Add_Remarks_Row">
+                            <Image Source="Images/add_icon.png" />
+                        </Button>
+                    </StackPanel>
+
+                    <ScrollViewer Grid.Row="1" Grid.Column="1">
+                        <StackPanel Margin="2 0 0 0" x:Name="remarks_list">
+                            <!--<TextBox ContextMenu="{StaticResource textbox}" x:Name="remark_0" Height="25" Padding="2" FontSize="14" Background="#f3f3f3" />-->
+                        </StackPanel>
+                    </ScrollViewer>
+                </Grid>
+                <!--#endregion Remarks-->
+
+                <TextBlock Text="{Binding Path=FormSet.LastSaved, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" x:Name="save_status_info" Grid.Row="6" Grid.ColumnSpan="4" HorizontalAlignment="Right" Margin="0 0 48 0" FontSize="11" />
+
+            </Grid>
+            <!--#endregion Examination Information-->
+        </Grid>
+
+    </DockPanel>
+</Window>
+    

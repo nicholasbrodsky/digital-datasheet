@@ -1,0 +1,98 @@
+﻿<Window x:Class="DigitalDatasheet.Views.SpecificationRequirementsEditView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:DigitalDatasheet.Views"
+        mc:Ignorable="d"
+        Icon="../Images/microscope_icon.ico"
+        Title="Edit Specification Requirements" Height="300" Width="1200">
+    <Grid Margin="12">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="4*" />
+            <ColumnDefinition Width="4*" />
+            <ColumnDefinition Width="4*" />
+            <ColumnDefinition Width="4*" />
+            <ColumnDefinition Width="4*" />
+            <ColumnDefinition Width="4*" />
+            <ColumnDefinition Width="4*" />
+            <ColumnDefinition Width="4*" />
+            <ColumnDefinition Width="4*" />
+            <ColumnDefinition Width="2*" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!--<StackPanel Orientation="Horizontal" Margin="12 4">-->
+        <TextBlock Grid.Row="0" Grid.Column="0" Text="Specification:" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="6 4" FontSize="16" />
+        <ComboBox Text="{Binding Path=Specification, Mode=TwoWay}" Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2" x:Name="specificationSelectInput" VerticalContentAlignment="Center" VerticalAlignment="Center" Height="25" Padding="2" Margin="4" IsEditable="True" FontSize="14"></ComboBox>
+        <!--</StackPanel>-->
+        <StackPanel Orientation="Horizontal" Grid.Row="1" Grid.ColumnSpan="5" Margin="0 16">
+            <Button Content="Select" Click="Select_Click" MinWidth="90" MinHeight="30" Margin="8 0" />
+            <Button Content="Update" Click="Update_Click" MinWidth="90" MinHeight="30" Margin="8 0" />
+            <Button Content="Add" Click="Add_Click" MinWidth="90" MinHeight="30" Margin="8 0" />
+            <Button Content="Cancel" Click="Cancel_Click" MinWidth="90" MinHeight="30" Margin="8 0" />
+            <Button Content="Delete" Click="Delete_Click" MinWidth="90" MinHeight="30" Margin="8 0" />
+        </StackPanel>
+        <TextBlock Grid.Row="2" Grid.Column="0" Text="Specification:" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="6 4" FontSize="16" />
+        <TextBox Text="{Binding Path=NewSpecification, Mode=TwoWay}" Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2" x:Name="specificationNewInput" Height="25" Padding="2" Margin="4 8 4 12" VerticalContentAlignment="Center" VerticalAlignment="Center" />
+        <!--<TextBlock Grid.Row="2" Grid.Column="3" Text="*NEW Spec Only" VerticalAlignment="Top" FontSize="10" Foreground="Red" />-->
+        
+        <!--#region Structure Titles-->
+        <Border Grid.Row="3" Grid.Column="0" BorderBrush="DarkGray" BorderThickness="1">
+            <TextBlock Text="Hole Copper Plating" TextWrapping="Wrap" TextAlignment="Center" Padding="2" VerticalAlignment="Center" />
+        </Border>
+        <Border Grid.Row="3" Grid.Column="1" BorderBrush="DarkGray" BorderThickness="1">
+            <TextBlock Text="Wrap Cu" TextWrapping="Wrap" TextAlignment="Center" Padding="2" VerticalAlignment="Center" />
+        </Border>
+        <Border Grid.Row="3" Grid.Column="2" BorderBrush="DarkGray" BorderThickness="1">
+            <TextBlock Text="Cap Cu" TextWrapping="Wrap" TextAlignment="Center" Padding="2" VerticalAlignment="Center" />
+        </Border>
+        <Border Grid.Row="3" Grid.Column="3" BorderBrush="DarkGray" BorderThickness="1">
+            <TextBlock Text="Min Etchback" TextWrapping="Wrap" TextAlignment="Center" Padding="2" VerticalAlignment="Center" />
+        </Border>
+        <Border Grid.Row="3" Grid.Column="4" BorderBrush="DarkGray" BorderThickness="1">
+            <TextBlock Text="Max Etchback" TextWrapping="Wrap" TextAlignment="Center" Padding="2" VerticalAlignment="Center" />
+        </Border>
+        <Border Grid.Row="3" Grid.Column="5" BorderBrush="DarkGray" BorderThickness="1">
+            <TextBlock Text="Internal Annular Ring" TextWrapping="Wrap" TextAlignment="Center" Padding="2" VerticalAlignment="Center" />
+        </Border>
+        <Border Grid.Row="3" Grid.Column="6" BorderBrush="DarkGray" BorderThickness="1">
+            <TextBlock Text="External Annular Ring" TextWrapping="Wrap" TextAlignment="Center" Padding="2" VerticalAlignment="Center" />
+        </Border>
+        <Border Grid.Row="3" Grid.Column="7" BorderBrush="DarkGray" BorderThickness="1">
+            <TextBlock Text="Dielectric Thickness" TextWrapping="Wrap" TextAlignment="Center" Padding="2" VerticalAlignment="Center" />
+        </Border>
+        <Border Grid.Row="3" Grid.Column="8" BorderBrush="DarkGray" BorderThickness="1">
+            <TextBlock Text="Wicking" TextWrapping="Wrap" TextAlignment="Center" Padding="2" VerticalAlignment="Center" />
+        </Border>
+        <Border Grid.Row="3" Grid.Column="9" BorderBrush="DarkGray" BorderThickness="1">
+            <TextBlock Text="Wicking Note" TextWrapping="Wrap" TextAlignment="Center" Padding="2" VerticalAlignment="Center" />
+        </Border>
+        <!--#endregion Structure Titles-->
+        
+        <!--#region Requirement Input-->
+        <TextBox Text="{Binding Path=SpecificationRequirements.HoleCuPlating, Mode=TwoWay}" Grid.Row="4" Grid.Column="0" Padding="0 0 0 5" FontSize="16" TextWrapping="Wrap" TextAlignment="Center" VerticalContentAlignment="Bottom" AcceptsReturn="True" />
+        <TextBox Text="{Binding Path=SpecificationRequirements.WrapCu, Mode=TwoWay}" Grid.Row="4" Grid.Column="1" Padding="0 0 0 5" FontSize="16" TextWrapping="Wrap" TextAlignment="Center" VerticalContentAlignment="Bottom" AcceptsReturn="True" />
+        <TextBox Text="{Binding Path=SpecificationRequirements.CapCu, Mode=TwoWay}" Grid.Row="4" Grid.Column="2" Padding="0 0 0 5" FontSize="16" TextWrapping="Wrap" TextAlignment="Center" VerticalContentAlignment="Bottom" AcceptsReturn="True" />
+        <TextBox Text="{Binding Path=SpecificationRequirements.MinEtchback, Mode=TwoWay}" Grid.Row="4" Grid.Column="3" Padding="0 0 0 5" FontSize="16" TextWrapping="Wrap" TextAlignment="Center" VerticalContentAlignment="Bottom" AcceptsReturn="True" />
+        <TextBox Text="{Binding Path=SpecificationRequirements.MaxEtchback, Mode=TwoWay}" Grid.Row="4" Grid.Column="4" Padding="0 0 0 5" FontSize="16" TextWrapping="Wrap" TextAlignment="Center" VerticalContentAlignment="Bottom" AcceptsReturn="True" />
+        <TextBox Text="{Binding Path=SpecificationRequirements.InternalAnnularRing, Mode=TwoWay}" Grid.Row="4" Grid.Column="5" Padding="0 0 0 5" FontSize="16" TextWrapping="Wrap" TextAlignment="Center" VerticalContentAlignment="Bottom" AcceptsReturn="True" />
+        <TextBox Text="{Binding Path=SpecificationRequirements.ExternalAnnularRing, Mode=TwoWay}" Grid.Row="4" Grid.Column="6" Padding="0 0 0 5" FontSize="16" TextWrapping="Wrap" TextAlignment="Center" VerticalContentAlignment="Bottom" AcceptsReturn="True" />
+        <TextBox Text="{Binding Path=SpecificationRequirements.Dielectric, Mode=TwoWay}" Grid.Row="4" Grid.Column="7" Padding="0 0 0 5" FontSize="16" TextWrapping="Wrap" TextAlignment="Center" VerticalContentAlignment="Bottom" AcceptsReturn="True" />
+        <TextBox Text="{Binding Path=SpecificationRequirements.Wicking, Mode=TwoWay}" Grid.Row="4" Grid.Column="8" Padding="0 0 0 5" FontSize="16" TextWrapping="Wrap" TextAlignment="Center" VerticalContentAlignment="Bottom" AcceptsReturn="True" />
+        <Border Grid.Row="4" Grid.Column="9" BorderBrush="DarkGray" BorderThickness="1">
+            <CheckBox IsChecked="{Binding Path=SpecificationRequirements.WickingNote, Mode=TwoWay}" VerticalAlignment="Center" HorizontalAlignment="Center">
+                <CheckBox.LayoutTransform>
+                    <ScaleTransform ScaleX="2" ScaleY="2" />
+                </CheckBox.LayoutTransform>
+            </CheckBox>
+        </Border>
+        <!--#endregion Requirement Input-->
+    </Grid>
+</Window>

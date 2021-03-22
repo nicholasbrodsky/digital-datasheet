@@ -1,0 +1,61 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <ApplicationIcon>microscope_icon.ico</ApplicationIcon>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="5.0.2" />
+    <PackageReference Include="System.Data.Odbc" Version="5.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DigitalDatasheetContextLib\DigitalDatasheetContextLib.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <COMReference Include="Microsoft.Office.Core">
+      <Guid>{2DF8D04C-5BFA-101B-BDE5-00AA0044DE52}</Guid>
+      <VersionMajor>2</VersionMajor>
+      <VersionMinor>8</VersionMinor>
+      <Lcid>0</Lcid>
+      <WrapperTool>primary</WrapperTool>
+      <Isolated>False</Isolated>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </COMReference>
+    <COMReference Include="Microsoft.Office.Interop.Word">
+      <Guid>{00020905-0000-0000-C000-000000000046}</Guid>
+      <VersionMajor>8</VersionMajor>
+      <VersionMinor>7</VersionMinor>
+      <Lcid>0</Lcid>
+      <WrapperTool>primary</WrapperTool>
+      <Isolated>False</Isolated>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </COMReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Images\add_icon.png" />
+    <Resource Include="Images\clock_icon.png" />
+    <Resource Include="Images\danger_icon.png" />
+    <Resource Include="Images\delete_icon.png" />
+    <Resource Include="Images\down_icon.png" />
+    <Resource Include="Images\edit_icon.png" />
+    <Resource Include="Images\error_icon.png" />
+    <Resource Include="Images\microscope_icon.ico" />
+    <Resource Include="Images\new_icon.png" />
+    <Resource Include="Images\open_icon.png" />
+    <Resource Include="Images\ptl_logo.png" />
+    <Resource Include="Images\remove_icon.png" />
+    <Resource Include="Images\save_icon.png" />
+    <Resource Include="Images\search_icon.png" />
+    <Resource Include="Images\success_icon.png" />
+    <Resource Include="Images\up_icon.png" />
+    <Resource Include="Images\warning_icon.png" />
+    <Resource Include="Images\yellow_background_icon.png" />
+  </ItemGroup>
+
+</Project>

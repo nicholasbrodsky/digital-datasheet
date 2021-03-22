@@ -1,0 +1,51 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <_LastSelectedProfileId>C:\Users\nbrodsky\Documents\DigitalDatasheet\DigitalDatasheet\Properties\PublishProfiles\ClickOnceProfile.pubxml</_LastSelectedProfileId>
+  </PropertyGroup>
+  <ItemGroup>
+    <ApplicationDefinition Update="App.xaml">
+      <SubType>Designer</SubType>
+    </ApplicationDefinition>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="Views\DataCheckValueEditView.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Views\StructureOrderEdit.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="MainWindow.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\DataCheckValueEditView.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\JobListView.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\OpenJobView.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\RemarksDocumentEditView.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\RemarksDocumentView.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\SpecificationRequirementsEditView.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\StructureOrderEdit.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\StructureRequirementsView.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\TestReportStructuresView.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+  </ItemGroup>
+</Project>

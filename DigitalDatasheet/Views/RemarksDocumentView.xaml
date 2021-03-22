@@ -1,0 +1,21 @@
+﻿<Window x:Class="DigitalDatasheet.Views.RemarksDocumentView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:DigitalDatasheet.Views"
+        mc:Ignorable="d"
+        Closed="Window_Closed"
+        Icon="../Images/microscope_icon.ico"
+        Title="Search Remarks Document" Height="200" Width="350" MinHeight="200" MinWidth="350" MaxHeight="200" MaxWidth="350">
+    <Border>
+        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+            <TextBlock Text="Select remark from documentation" FontSize="16" Margin="0 4 12 8" />
+            <ComboBox x:Name="remark_selection" MaxWidth="260" Height="25" Padding="2" FontSize="14" IsEditable="True"></ComboBox>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0 24 0 0">
+                <Button Content="OK" MinWidth="90" MinHeight="30" Click="Ok_Click" />
+                <Button Content="Cancel" MinWidth="90" MinHeight="30" Margin="12 0 0 0" Click="Cancel_Click" />
+            </StackPanel>
+        </StackPanel>
+    </Border>
+</Window>
