@@ -118,8 +118,8 @@ namespace DigitalDatasheet
 		public bool JobConflictWarning { get; set; } = false;
 		//public bool IsOpened { get; set; }
 		public bool IsOpening { get; set; }
-		//public bool IsSaved { get; set; }
-		public bool IsClosed { get; set; }
+        public bool IsReadyOnly { get; set; }
+        public bool IsClosed { get; set; }
         public List<decimal?> DefaultCheckList { get; set; }
 
         #region Unsaved Changes Check
@@ -4295,6 +4295,27 @@ namespace DigitalDatasheet
 				await using (var db = new DigitalDatasheetContext())
 				{
 					JobForm jobForm = await db.JobForms.FindAsync(fullWorkOrderNumber, testCondition, testPerformedOn);
+					
+					// check if job is currently in use
+					if (jobForm.IsOpen)
+                    {
+						if (MessageBox.Show("This job is currently being worked on by another user. Would you like to open the job as read-only?",
+							"Open Read-Only?", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+							IsReadyOnly = true;
+						else
+							return;
+                    }
+					else
+                    {
+						jobForm.IsOpen = true;
+						int affected = await db.SaveChangesAsync();
+						if (affected != 1)
+                        {
+							MessageBox.Show("ERROR setting job to open");
+							return;
+                        }
+                    }
+
 					FormSet.WorkOrderNo = workOrderNumber;
 					FormSet.WorkOrderNoDash = workOrderNumberDash;
 					condition_input.SelectedIndex = testCondition == "As Received" ? 0 : 1;

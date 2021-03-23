@@ -37,8 +37,12 @@ namespace DigitalDatasheetEntityLib
         public int? TotalTime { get; set; }
         public int? TestTemp { get; set; }
         public int? SolderFloats { get; set; }
+        #endregion Job Form Vars
+        #region Job Info Vars
         [Column(TypeName = "TEXT")]
         public DateTime? LastSaved { get; set; }
-        #endregion Job Form Vars
+        [Column(TypeName = "INTEGER")]
+        public bool IsOpen { get; set; }
+        #endregion Job Info Vars`
     }
 }
