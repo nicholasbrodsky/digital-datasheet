@@ -204,7 +204,7 @@ namespace DigitalDatasheet
 
 			DefaultCheckList = new List<decimal?>
 			{
-				0.005m, 0.005m, 0.005m, 0.005m, 0.005m, 0.005m, null, null, null, null, null, null
+				0.005m, 0.005m, 0.005m, 0.005m, 0.005m, 0.005m, 0.005m, 0.005m, 0.005m, 0.005m, 0.005m, 0.005m
 			};
 
 			condition_input.SelectedIndex = 0;
