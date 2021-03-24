@@ -5,18 +5,80 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:DigitalDatasheet.Views"
         mc:Ignorable="d"
-        Title="DataCheckValueEditView" Height="450" Width="320">
+        Closed="Window_Closed"
+        Title="Edit Mistype Values" Height="480" MinWidth="350" MaxWidth="350">
     <Grid Margin="16 8">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto" />
-            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="0" Grid.Column="0" Text="Hole Cu Plating: " FontSize="16" />
-        <TextBox Grid.Row="0" Grid.Column="1" FontSize="16" Height="25" Padding="2" />
+        <TextBlock Grid.Row="0" Grid.Column="0" Text="Hole Cu Plating: " FontSize="16" HorizontalAlignment="Right" Margin="0 4 2 2" />
+        <TextBox Text="{Binding Path=DefaultCheckList[0], Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                 Grid.Row="0" Grid.Column="1" FontSize="16" Height="25" Padding="2" Margin="0 4 0 2" />
+
+        <TextBlock Grid.Row="1" Grid.Column="0" Text="External Conductor Thickness: " FontSize="16" HorizontalAlignment="Right" Margin="0 4 2 2" />
+        <TextBox Text="{Binding Path=DefaultCheckList[1], Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                 Grid.Row="1" Grid.Column="1" FontSize="16" Height="25" Padding="2" Margin="0 4 0 2" />
+
+        <TextBlock Grid.Row="2" Grid.Column="0" Text="Surface Clad Cu: " FontSize="16" HorizontalAlignment="Right" Margin="0 4 2 2" />
+        <TextBox Text="{Binding Path=DefaultCheckList[2], Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                 Grid.Row="2" Grid.Column="1" FontSize="16" Height="25" Padding="2" Margin="0 4 0 2" />
+
+        <TextBlock Grid.Row="3" Grid.Column="0" Text="Wrap Cu: " FontSize="16" HorizontalAlignment="Right" Margin="0 4 2 2" />
+        <TextBox Text="{Binding Path=DefaultCheckList[3], Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                 Grid.Row="3" Grid.Column="1" FontSize="16" Height="25" Padding="2" Margin="0 4 0 2" />
+
+        <TextBlock Grid.Row="4" Grid.Column="0" Text="Cap Cu: " FontSize="16" HorizontalAlignment="Right" Margin="0 4 2 2" />
+        <TextBox Text="{Binding Path=DefaultCheckList[4], Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                 Grid.Row="4" Grid.Column="1" FontSize="16" Height="25" Padding="2" Margin="0 4 0 2" />
+
+        <TextBlock Grid.Row="5" Grid.Column="0" Text="Internal Clad Cu: " FontSize="16" HorizontalAlignment="Right" Margin="0 4 2 2" />
+        <TextBox Text="{Binding Path=DefaultCheckList[5], Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                 Grid.Row="5" Grid.Column="1" FontSize="16" Height="25" Padding="2" Margin="0 4 0 2" />
+
+        <TextBlock Grid.Row="6" Grid.Column="0" Text="Min Etchback: " FontSize="16" HorizontalAlignment="Right" Margin="0 4 2 2" />
+        <TextBox Text="{Binding Path=DefaultCheckList[6], Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                 Grid.Row="6" Grid.Column="1" FontSize="16" Height="25" Padding="2" Margin="0 4 0 2" />
+
+        <TextBlock Grid.Row="7" Grid.Column="0" Text="Max Etchback: " FontSize="16" HorizontalAlignment="Right" Margin="0 4 2 2" />
+        <TextBox Text="{Binding Path=DefaultCheckList[7], Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                 Grid.Row="7" Grid.Column="1" FontSize="16" Height="25" Padding="2" Margin="0 4 0 2" />
+
+        <TextBlock Grid.Row="8" Grid.Column="0" Text="Internal Annular Ring: " FontSize="16" HorizontalAlignment="Right" Margin="0 4 2 2" />
+        <TextBox Text="{Binding Path=DefaultCheckList[8], Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                 Grid.Row="8" Grid.Column="1" FontSize="16" Height="25" Padding="2" Margin="0 4 0 2" />
+
+        <TextBlock Grid.Row="9" Grid.Column="0" Text="External Annular Ring: " FontSize="16" HorizontalAlignment="Right" Margin="0 4 2 2" />
+        <TextBox Text="{Binding Path=DefaultCheckList[9], Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                 Grid.Row="9" Grid.Column="1" FontSize="16" Height="25" Padding="2" Margin="0 4 0 2" />
+
+        <TextBlock Grid.Row="10" Grid.Column="0" Text="Dielectric: " FontSize="16" HorizontalAlignment="Right" Margin="0 4 2 2" />
+        <TextBox Text="{Binding Path=DefaultCheckList[10], Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                 Grid.Row="10" Grid.Column="1" FontSize="16" Height="25" Padding="2" Margin="0 4 0 2" />
+
+        <TextBlock Grid.Row="11" Grid.Column="0" Text="Wicking: " FontSize="16" HorizontalAlignment="Right" Margin="0 4 2 2" />
+        <TextBox Text="{Binding Path=DefaultCheckList[11], Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                 Grid.Row="11" Grid.Column="1" FontSize="16" Height="25" Padding="2" Margin="0 4 0 2" />
+
+        <StackPanel Orientation="Horizontal" Grid.Row="12" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Right">
+            <Button Click="Update_Click" Content="Update" MinWidth="90" MinHeight="30" Margin="0 16 8 0" />
+            <Button Click="Cancel_Click" Content="Cancel" MinWidth="90" MinHeight="30" Margin="0 16 0 0" />
+        </StackPanel>
     </Grid>
 </Window>

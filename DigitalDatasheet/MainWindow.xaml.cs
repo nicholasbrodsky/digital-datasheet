@@ -5836,7 +5836,7 @@ namespace DigitalDatasheet
 
         private void Edit_MistypeValues_Click(object sender, RoutedEventArgs e)
         {
-			var win = new DataCheckValueEditView();
+			var win = new DataCheckValueEditView(DefaultCheckList);
 			win.ShowDialog();
         }
     }
