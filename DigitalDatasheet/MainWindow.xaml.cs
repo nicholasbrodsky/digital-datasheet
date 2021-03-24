@@ -4297,24 +4297,24 @@ namespace DigitalDatasheet
 					JobForm jobForm = await db.JobForms.FindAsync(fullWorkOrderNumber, testCondition, testPerformedOn);
 					
 					// check if job is currently in use
-					if (jobForm.IsOpen)
-                    {
-						if (MessageBox.Show("This job is currently being worked on by another user. Would you like to open the job as read-only?",
-							"Open Read-Only?", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
-							IsReadyOnly = true;
-						else
-							return;
-                    }
-					else
-                    {
-						jobForm.IsOpen = true;
-						int affected = await db.SaveChangesAsync();
-						if (affected != 1)
-                        {
-							MessageBox.Show("ERROR setting job to open");
-							return;
-                        }
-                    }
+					//if (jobForm.IsOpen)
+     //               {
+					//	if (MessageBox.Show("This job is currently being worked on by another user. Would you like to open the job as read-only?",
+					//		"Open Read-Only?", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+					//		IsReadyOnly = true;
+					//	else
+					//		return;
+     //               }
+					//else
+     //               {
+					//	jobForm.IsOpen = true;
+					//	int affected = await db.SaveChangesAsync();
+					//	if (affected != 1)
+     //                   {
+					//		MessageBox.Show("ERROR setting job to open");
+					//		return;
+     //                   }
+     //               }
 
 					FormSet.WorkOrderNo = workOrderNumber;
 					FormSet.WorkOrderNoDash = workOrderNumberDash;

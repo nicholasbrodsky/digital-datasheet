@@ -375,7 +375,7 @@ namespace DigitalDatasheet.Documents
                             {
                                 dataTable.Cell(tempRow, tempColumn).Range.Text = "";
                                 dataTable.Cell(tempRow, tempColumn - 1).Merge(dataTable.Cell(tempRow, tempColumn));
-                                tempLastColumn--;
+                                //tempLastColumn--;
                                 //tempColumn--;
                                 //continue;
                             }
