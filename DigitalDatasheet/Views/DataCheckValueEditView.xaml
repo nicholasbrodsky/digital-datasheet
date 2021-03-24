@@ -5,8 +5,18 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:DigitalDatasheet.Views"
         mc:Ignorable="d"
-        Title="DataCheckValueEditView" Height="450" Width="800">
-    <Grid>
-        
+        Title="DataCheckValueEditView" Height="450" Width="320">
+    <Grid Margin="16 8">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" Grid.Column="0" Text="Hole Cu Plating: " FontSize="16" />
+        <TextBox Grid.Row="0" Grid.Column="1" FontSize="16" Height="25" Padding="2" />
     </Grid>
 </Window>

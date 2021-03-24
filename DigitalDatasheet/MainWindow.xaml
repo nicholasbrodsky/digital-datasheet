@@ -90,7 +90,7 @@
             </MenuItem>
             <MenuItem Header="_Edit">
                 <MenuItem Header="_Structure Order" Click="Edit_StructureOrder_Click" Background="#fff" BorderThickness="0" Padding="0 6" />
-                <MenuItem Header="Default Mistype Values" Background="#fff" BorderThickness="0" Padding="0 6" />
+                <MenuItem Header="Default Mistype Values" Click="Edit_MistypeValues_Click" Background="#fff" BorderThickness="0" Padding="0 6" />
                 <MenuItem Header="_Remarks Document" Click="Edit_RemarksDocument_Menu_Click" Background="#fff" BorderThickness="0" Padding="0 6" />
                 <MenuItem Header="_Specification Requirements" Click="Edit_SpecificationRequirements_Menu_Click" Background="#fff" BorderThickness="0" Padding="0 6" />
             </MenuItem>

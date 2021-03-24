@@ -5833,5 +5833,11 @@ namespace DigitalDatasheet
 		{
 			PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 		}
+
+        private void Edit_MistypeValues_Click(object sender, RoutedEventArgs e)
+        {
+			var win = new DataCheckValueEditView();
+			win.ShowDialog();
+        }
     }
 }
