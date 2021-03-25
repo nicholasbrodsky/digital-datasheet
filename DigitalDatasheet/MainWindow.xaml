@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:DigitalDatasheet" d:DataContext="{d:DesignInstance Type=local:MainWindow}"
+        xmlns:uc="clr-namespace:DigitalDatasheet.Controls"
         mc:Ignorable="d"
         Icon="Images/microscope_icon.ico"
         WindowStartupLocation="CenterScreen"
@@ -285,6 +286,8 @@
             </Border>
         </Canvas>
         <!--#endregion Measurement Zoom-->
+
+        <!--<uc:LoadingControl DockPanel.Dock="Top" />-->
 
         <Grid x:Name="job_page" KeyDown="Job_Grid_KeyDown">
             <Grid.RowDefinitions>
