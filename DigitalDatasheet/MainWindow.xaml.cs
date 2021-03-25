@@ -1993,7 +1993,7 @@ namespace DigitalDatasheet
 							if (MessageBox.Show($"The max value set for this column is \"{valueCheck:0.0000}\" and your current measurement is \"{measurement}\". Was this a mistype?",
 								"Possible Mistype!", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
                             {
-								textBox.BorderBrush = new SolidColorBrush(Colors.Red);
+								textBox.Text = $"*{boxContent}*";
 								return;
                             }
                         }
@@ -2009,7 +2009,7 @@ namespace DigitalDatasheet
 						if (MessageBox.Show($"The max value set for this column is \"{valueCheck:0.0000}\" and your current measurement is \"{measurement}\". Was this a mistype?",
 							"Possible Mistype!", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
 						{
-							textBox.BorderBrush = new SolidColorBrush(Colors.OrangeRed);
+							textBox.Text = $"*{boxContent}*";
 						}
 					}
 				}
@@ -5477,7 +5477,12 @@ namespace DigitalDatasheet
 		private void Edit_StructureOrder_Click(object sender, RoutedEventArgs e)
         {
 
-        }
+		}
+		private void Edit_MistypeValues_Click(object sender, RoutedEventArgs e)
+		{
+			var win = new DataCheckValueEditView(DefaultCheckList);
+			win.ShowDialog();
+		}
 		private void Edit_RemarksDocument_Menu_Click(object sender, RoutedEventArgs e)
 		{
 			try
@@ -5834,10 +5839,5 @@ namespace DigitalDatasheet
 			PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 		}
 
-        private void Edit_MistypeValues_Click(object sender, RoutedEventArgs e)
-        {
-			var win = new DataCheckValueEditView(DefaultCheckList);
-			win.ShowDialog();
-        }
     }
 }
