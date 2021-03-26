@@ -14,6 +14,7 @@ using System.Net.NetworkInformation;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -4245,8 +4246,10 @@ namespace DigitalDatasheet
 						workOrderNumber = workOrderSplit[0].Trim();
 						workOrderNumberDash = workOrderSplit[1].Trim();
 					}
-
-					await Open_Job(workOrderNumber, workOrderNumberDash, fullWorkOrderNumber, testPerformedOn, testCondition);
+					await Set_Loading_Spinner(true);
+                    //await Task.Delay(2000);
+                    await Open_Job(workOrderNumber, workOrderNumberDash, fullWorkOrderNumber, testPerformedOn, testCondition);
+					await Set_Loading_Spinner(false);
 				}
 				else
 				{
@@ -4284,6 +4287,7 @@ namespace DigitalDatasheet
 		}
 		private async Task Open_Job(string workOrderNumber, string workOrderNumberDash, string fullWorkOrderNumber, string testPerformedOn, string testCondition)
 		{
+			//await Task.Run(() => Set_Loading_Spinner(true));
 			if (!NetConn)
 			{
 				MessageBox.Show("No network connection");
@@ -4727,6 +4731,7 @@ namespace DigitalDatasheet
 			UnsavedRemarks = false;
 			IsOpening = false;
 			await Check_DueDate();
+			//await Task.Run(() => Set_Loading_Spinner(false));
 			//IsOpened = true;
 		}
 		private async void Save_Menu_Click(object sender, RoutedEventArgs e)
@@ -5706,23 +5711,37 @@ namespace DigitalDatasheet
 		}
 		private async void Create_Hard_Copy_Async(object sender, RoutedEventArgs e)
 		{
+			await Set_Loading_Spinner(true);
 			if (!NetConn)
 			{
 				MessageBox.Show("No network connection");
+				await Set_Loading_Spinner(false);
 				return;
 			}
-            if (string.IsNullOrEmpty(FormSet.FullWorkOrder) || string.IsNullOrEmpty(FormSet.TestPerformedOn)) return;
+            if (string.IsNullOrEmpty(FormSet.FullWorkOrder) || string.IsNullOrEmpty(FormSet.TestPerformedOn))
+			{
+				await Set_Loading_Spinner(false);
+				return;
+			}
 			if (await Check_Incomplete_Notes())
             {
-				if (MessageBox.Show("There are job notes that have not yet been completed. Would you like to continue anyway?", "Incomplete Job Notes!", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.No)
+				if (MessageBox.Show("There are job notes that have not yet been completed. Would you like to continue anyway?",
+					"Incomplete Job Notes!", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.No)
+				{
+					await Set_Loading_Spinner(false);
 					return;
+                }
             }
             //if (!Valid_Save_Check()) return;
             if (UnsavedChanges = await Unsaved_Changes_CheckAsync())
 			{
 				MessageBoxResult saveJob = MessageBox.Show("To create a Hard Copy, you must first save the current job. Would you like to continue?",
 					"Save & Continue?", MessageBoxButton.YesNo, MessageBoxImage.Question);
-				if (saveJob == MessageBoxResult.No) return;
+				if (saveJob == MessageBoxResult.No)
+				{
+					await Set_Loading_Spinner(false);
+					return;
+                }
 				await Save_Job();
 			}
 
@@ -5757,9 +5776,11 @@ namespace DigitalDatasheet
 				await Task.Run(() => hardCopy.SetHeaderInfo(headerInfo));
 				await Task.Run(() => hardCopy.SetRemarks(remarkSet));
 				await hardCopy.SaveAndClose(FormSet.Customer);
+				await Set_Loading_Spinner(false);
 			}
 			catch
 			{
+				await Set_Loading_Spinner(false);
 				MessageBox.Show($"Hard Copy error. Please check error log file for details.");
 			}
 		}
@@ -5833,6 +5854,23 @@ namespace DigitalDatasheet
 					return false;
 			}
 			return true;
+        }
+
+		private delegate void Set_Loading_Spinner_Callback(bool loading);
+		private async Task Set_Loading_Spinner(bool loading)
+        {
+			if (loading)
+            {
+				loadingSpinnerCanvas.Visibility = Visibility.Visible;
+				job_form.Opacity = 0.4;
+				exam_info.Opacity = 0.4;
+			}
+            else
+            {
+				loadingSpinnerCanvas.Visibility = Visibility.Hidden;
+				job_form.Opacity = 1;
+				exam_info.Opacity = 1;
+			}
         }
 		private void OnPropertyChanged([CallerMemberName] string propertyName = null)
 		{

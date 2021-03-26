@@ -4,14 +4,13 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:DigitalDatasheet.Controls"
-             mc:Ignorable="d" 
-             d:DesignHeight="120" d:DesignWidth="250">
+             mc:Ignorable="d" >
     <UserControl.Resources>
         <Color x:Key="FilledColor" A="255" B="155" R="155" G="155"/>
         <Color x:Key="UnfilledColor" A="0" B="155" R="155" G="155"/>
 
         <Style x:Key="BusyAnimationStyle" TargetType="Control">
-            <Setter Property="Background" Value="#7F000000"/>
+            <Setter Property="Background" Value="Transparent"/>
 
             <Setter Property="Template">
                 <Setter.Value>
@@ -100,8 +99,16 @@
                             </Trigger>
                         </ControlTemplate.Triggers>
 
-                        <Border BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}">
+                        <Border BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" Padding="12">
                             <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="*" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+
                                 <Canvas Height="60" Width="60">
                                     <Canvas.Resources>
                                         <Style TargetType="Ellipse">
@@ -121,7 +128,7 @@
                                     <Ellipse x:Name="ellipse7" Canvas.Top="34.25" Canvas.Left="7" />
                                     <Ellipse Width="39.5" Height="39.5" Canvas.Left="8.75" Canvas.Top="8" Visibility="Hidden"/>
                                 </Canvas>
-                                <Label Content="{Binding Path=Text}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                <TextBlock Grid.Row="1" Text="Loading..." HorizontalAlignment="Center" FontSize="24" Foreground="#fff"/>
                             </Grid>
                         </Border>
                     </ControlTemplate>
@@ -129,9 +136,5 @@
             </Setter>
         </Style>
     </UserControl.Resources>
-    <Grid>
-        <Control Style="{StaticResource BusyAnimationStyle}"/>
-        <TextBlock Text="Loading" HorizontalAlignment="Center" VerticalAlignment="Bottom"
-                   FontSize="18" Foreground="Yellow"/>
-    </Grid>
+    <Control Style="{StaticResource BusyAnimationStyle}"/>
 </UserControl>

@@ -213,7 +213,9 @@
                                 <LineBreak />
                                 <Run FontSize="10">(if applicable)</Run>
                         </TextBlock>
-                        --><!--<TextBlock TextWrapping="Wrap" TextAlignment="Center" >Surface<LineBreak/>Clad/Wrap Plating</TextBlock>--><!--
+                        -->
+                    <!--<TextBlock TextWrapping="Wrap" TextAlignment="Center" >Surface<LineBreak/>Clad/Wrap Plating</TextBlock>-->
+                    <!--
                     </Border>-->
                     <Border Grid.Row="1" Grid.Column="4" BorderBrush="DarkGray" BorderThickness="1" Padding="2">
                         <TextBlock Text="Surface Wrap Copper" TextWrapping="Wrap" TextAlignment="Center" />
@@ -287,9 +289,9 @@
         </Canvas>
         <!--#endregion Measurement Zoom-->
 
-        <!--<uc:LoadingControl DockPanel.Dock="Top" />-->
-
-        <Grid x:Name="job_page" KeyDown="Job_Grid_KeyDown">
+        
+        
+        <Grid x:Name="job_page" KeyDown="Job_Grid_KeyDown" >
             <Grid.RowDefinitions>
                 <!-- Job Information Row -->
                 <RowDefinition Height="Auto" />
@@ -297,8 +299,14 @@
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
+            <!--#region Loading Spinner -->
+            <Canvas Panel.ZIndex="2" Background="#9F000000" Grid.RowSpan="2" x:Name="loadingSpinnerCanvas" Visibility="Hidden">
+                <uc:LoadingControl Canvas.Left="658" Canvas.Top="176" Height="150" Width="200" />
+            </Canvas>
+            <!--#endregion Loading Spinner -->
+
             <!--#region Job Information Form -->
-            <Grid Grid.Row="0" Margin="20 8" x:Name="job_form" Visibility="Visible">
+            <Grid Grid.Row="0" Margin="20 8" x:Name="job_form">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*" />
                     <RowDefinition Height="*" />
@@ -538,7 +546,7 @@
                     </StackPanel>
                     <TextBlock Grid.Column="2" Text="Observations" FontSize="18" HorizontalAlignment="Center" />
                 </Grid>
-                
+
                 <!--#endregion-->
 
                 <!--#region Required Examination Titles -->
@@ -586,7 +594,9 @@
                                 <LineBreak />
                                 <Run FontSize="10">(if applicable)</Run>
                             </TextBlock>
-                            --><!--<TextBlock TextWrapping="Wrap" TextAlignment="Center" >Surface<LineBreak/>Clad/Wrap Plating</TextBlock>--><!--
+                            -->
+                        <!--<TextBlock TextWrapping="Wrap" TextAlignment="Center" >Surface<LineBreak/>Clad/Wrap Plating</TextBlock>-->
+                        <!--
                         </Border>-->
                         <Border Grid.Column="4" BorderBrush="DarkGray" BorderThickness="1" Padding="2">
                             <TextBlock Text="Surface Wrap Copper" TextWrapping="Wrap" TextAlignment="Center" />
