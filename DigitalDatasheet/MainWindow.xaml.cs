@@ -133,6 +133,7 @@ namespace DigitalDatasheet
 
 		public bool DuplicateDataRow { get; set; }
         public bool ZoomWinOpen { get; set; }
+		delegate Task Open_Job_Delegate(string workOrderNumber, string workOrderNumberDash, string fullWorkOrderNumber, string testPerformedOn, string testCondition);
         public MainWindow()
 		{
 			DataContext = this;
@@ -4246,10 +4247,12 @@ namespace DigitalDatasheet
 						workOrderNumber = workOrderSplit[0].Trim();
 						workOrderNumberDash = workOrderSplit[1].Trim();
 					}
-					await Set_Loading_Spinner(true);
+					await Dispatcher.BeginInvoke(new Set_Loading_Spinner_Callback(Set_Loading_Spinner), true);
+                    //Thread.Sleep(200);
                     //await Task.Delay(2000);
-                    await Open_Job(workOrderNumber, workOrderNumberDash, fullWorkOrderNumber, testPerformedOn, testCondition);
-					await Set_Loading_Spinner(false);
+                    //await Open_Job(workOrderNumber, workOrderNumberDash, fullWorkOrderNumber, testPerformedOn, testCondition);
+                    await Dispatcher.BeginInvoke(new Open_Job_Delegate(Open_Job), workOrderNumber, workOrderNumberDash, fullWorkOrderNumber, testPerformedOn, testCondition);
+                    await Dispatcher.BeginInvoke(new Set_Loading_Spinner_Callback(Set_Loading_Spinner), false);
 				}
 				else
 				{
@@ -4287,7 +4290,7 @@ namespace DigitalDatasheet
 		}
 		private async Task Open_Job(string workOrderNumber, string workOrderNumberDash, string fullWorkOrderNumber, string testPerformedOn, string testCondition)
 		{
-			//await Task.Run(() => Set_Loading_Spinner(true));
+            //await Task.Run(() => Set_Loading_Spinner(true));
 			if (!NetConn)
 			{
 				MessageBox.Show("No network connection");
@@ -4299,26 +4302,6 @@ namespace DigitalDatasheet
 				await using (var db = new DigitalDatasheetContext())
 				{
 					JobForm jobForm = await db.JobForms.FindAsync(fullWorkOrderNumber, testCondition, testPerformedOn);
-					
-					// check if job is currently in use
-					//if (jobForm.IsOpen)
-     //               {
-					//	if (MessageBox.Show("This job is currently being worked on by another user. Would you like to open the job as read-only?",
-					//		"Open Read-Only?", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
-					//		IsReadyOnly = true;
-					//	else
-					//		return;
-     //               }
-					//else
-     //               {
-					//	jobForm.IsOpen = true;
-					//	int affected = await db.SaveChangesAsync();
-					//	if (affected != 1)
-     //                   {
-					//		MessageBox.Show("ERROR setting job to open");
-					//		return;
-     //                   }
-     //               }
 
 					FormSet.WorkOrderNo = workOrderNumber;
 					FormSet.WorkOrderNoDash = workOrderNumberDash;
@@ -4394,12 +4377,15 @@ namespace DigitalDatasheet
 
 				await using (var db = new DigitalDatasheetContext())
 				{
-					var jobData = db.JobDataTable
+					var jobData = await db.JobDataTable
 						.Where(data => data.WorkOrderNumber.Equals(fullWorkOrderNumber) && data.TestCondition.Equals(testCondition) && data.TestPerformedOn.Equals(testPerformedOn))
 						.OrderBy(data => data.StructureOrder)
 						.ThenBy(data => data.Row)
+						.ToListAsync();
+					var structureInfo = jobData.Select(data => new { data.StructureTitle, data.StructureOrder })
+						.Distinct()
+						.OrderBy(data => data.StructureOrder)
 						.ToList();
-					var structureInfo = jobData.Select(data => new { data.StructureTitle, data.StructureOrder }).Distinct().OrderBy(data => data.StructureOrder).ToList();
 
 					recordCount = 0;
 					for (int i = 0; i < structureInfo.Count; i++)
@@ -4407,9 +4393,9 @@ namespace DigitalDatasheet
 						StructureTitles[i].StructureTitle = structureInfo[i].StructureTitle;
 						StructureTitles[i].StructureOrder = structureInfo[i].StructureOrder;
 
-						var currentStructData = db.JobDataTable.Where(data => data.WorkOrderNumber.Equals(fullWorkOrderNumber) && data.TestCondition.Equals(testCondition) && data.TestPerformedOn.Equals(testPerformedOn) && data.StructureTitle.Equals(structureInfo[i].StructureTitle))
+						var currentStructData = await db.JobDataTable.Where(data => data.WorkOrderNumber.Equals(fullWorkOrderNumber) && data.TestCondition.Equals(testCondition) && data.TestPerformedOn.Equals(testPerformedOn) && data.StructureTitle.Equals(structureInfo[i].StructureTitle))
 							.OrderBy(data => data.Row)
-							.ToList();
+							.ToListAsync();
 
 						Button add_row_btn = FindName(AddGridBtnNames[i]) as Button;
 						for (int j = 0; j < currentStructData.Count; j++)
@@ -5546,17 +5532,24 @@ namespace DigitalDatasheet
 				if (binding != null)
 					binding.UpdateSource();
 			}
+
 			if (string.IsNullOrEmpty(FormSet.FullWorkOrder) || string.IsNullOrEmpty(FormSet.TestPerformedOn)) return;
 			if (await Check_Incomplete_Notes())
 			{
-				if (MessageBox.Show("There are job notes that have not yet been completed. Would you like to continue anyway?", "Incomplete Job Notes!", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.No)
+				if (MessageBox.Show("There are job notes that have not yet been completed. Would you like to continue anyway?",
+					"Incomplete Job Notes!", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.No)
+				{
 					return;
+                }
 			}
 			if (UnsavedChanges = await Unsaved_Changes_CheckAsync())
 			{
 				MessageBoxResult saveJob = MessageBox.Show("To create a Test Report, you must first save the current job. Would you like to continue?",
 					"Save & Continue?", MessageBoxButton.YesNo, MessageBoxImage.Question);
-				if (saveJob == MessageBoxResult.No) return;
+				if (saveJob == MessageBoxResult.No)
+				{
+					return;
+                }
 				await Save_Job();
 			}
 			try
@@ -5564,7 +5557,10 @@ namespace DigitalDatasheet
 				var testReport = new TestReport(FormSet.FullWorkOrder, FormSet.TestCondition, FormSet.PartNumber, FormSet.DateCode, FormSet.TestPerformedOn);
 				int dataPerPage;
 				// check for distinct serial numbers
-				bool distinctSn = RecordSet.Where(r => r.StructureInfo.StructureOrder == 1).Select(data => new { data.SerialNumber }).Distinct().Count() == RecordSet.Where(r => r.StructureInfo.StructureOrder == 1).Count();
+				bool distinctSn = RecordSet.Where(r => r.StructureInfo.StructureOrder == 1)
+					.Select(data => new { data.SerialNumber })
+					.Distinct()
+					.Count() == RecordSet.Where(r => r.StructureInfo.StructureOrder == 1).Count();
 				if (StructureTitles.Count == 1)
 				{
 					dataPerPage = RecordSet.Count;
@@ -5573,9 +5569,12 @@ namespace DigitalDatasheet
 						TestReportStructuresView win = new TestReportStructuresView();
 						win.ShowDialog();
 						if (!win.OkClick)
+                        {
 							return;
+                        }
 						dataPerPage = win.DataPerPage;
 					}
+					await Dispatcher.BeginInvoke(new Set_Loading_Spinner_Callback(Set_Loading_Spinner), true);
 					await using (var db = new DigitalDatasheetContext())
 					{
 						db.JobDataTable
@@ -5612,7 +5611,8 @@ namespace DigitalDatasheet
 					{
 						if (string.IsNullOrEmpty(structure.StructureTitle) || !structure.StructureTitle.Contains(";"))
 						{
-							MessageBox.Show("All structure titles must be set before creating test report. Fill out any remaining structure titles and try again", "Incomplete Structure Titles", MessageBoxButton.OK, MessageBoxImage.Error);
+							MessageBox.Show("All structure titles must be set before creating test report. Fill out any remaining structure titles and try again",
+								"Incomplete Structure Titles", MessageBoxButton.OK, MessageBoxImage.Error);
 							return;
 						}
 						structureList.Add(structure.StructureTitle);
@@ -5621,8 +5621,10 @@ namespace DigitalDatasheet
 					win.Set_Layout();
 					win.ShowDialog();
 					if (!win.OkClick)
+                    {
 						return;
-
+					}
+					await Dispatcher.BeginInvoke(new Set_Loading_Spinner_Callback(Set_Loading_Spinner), true);
 					// list of structure titles and their corresponding titles for the test report
 					List<(string, string)> structureToReportStructure = win.StructureToReportStructure;
 					List<string> reportStructures = new List<string>();
@@ -5644,7 +5646,7 @@ namespace DigitalDatasheet
 						List<List<string>> dataRows = new List<List<string>>();
 						List<string> acceptRejects = new List<string>();
 						/*var locRecords = */
-						using (var db = new DigitalDatasheetContext())
+						await using (var db = new DigitalDatasheetContext())
 						{
 							db.JobDataTable
 								.Where(data => data.WorkOrderNumber.Equals(FormSet.FullWorkOrder) && data.TestCondition.Equals(FormSet.TestCondition) && data.TestPerformedOn.Equals(FormSet.TestPerformedOn)
@@ -5685,7 +5687,7 @@ namespace DigitalDatasheet
 						break;
 					}
 				}
-				await Task.Run(testReport.Set_Reject_Background_Color);
+				/*await Task.Run*/testReport.Set_Reject_Background_Color();
 				List<string> requirementList = new List<string>
 				{
 					Requirement.HoleCuPlating,
@@ -5701,26 +5703,28 @@ namespace DigitalDatasheet
 					Requirement.Dielectric,
 					Requirement.Wicking
 				};
-				await Task.Run(() => testReport.Set_Requirements(requirementList));
+				testReport.Set_Requirements(requirementList);
 				await testReport.Save_And_Close(FormSet.Customer);
+				await Dispatcher.BeginInvoke(new Set_Loading_Spinner_Callback(Set_Loading_Spinner), false);
 			}
 			catch (Exception)
 			{
+				await Dispatcher.BeginInvoke(new Set_Loading_Spinner_Callback(Set_Loading_Spinner), false);
 				MessageBox.Show("Test Report creation error. Please check error log file for details.");
 			}
 		}
 		private async void Create_Hard_Copy_Async(object sender, RoutedEventArgs e)
 		{
-			await Set_Loading_Spinner(true);
+			//await Set_Loading_Spinner(true);
 			if (!NetConn)
 			{
 				MessageBox.Show("No network connection");
-				await Set_Loading_Spinner(false);
+				//await Set_Loading_Spinner(false);
 				return;
 			}
             if (string.IsNullOrEmpty(FormSet.FullWorkOrder) || string.IsNullOrEmpty(FormSet.TestPerformedOn))
 			{
-				await Set_Loading_Spinner(false);
+				//await Set_Loading_Spinner(false);
 				return;
 			}
 			if (await Check_Incomplete_Notes())
@@ -5728,7 +5732,7 @@ namespace DigitalDatasheet
 				if (MessageBox.Show("There are job notes that have not yet been completed. Would you like to continue anyway?",
 					"Incomplete Job Notes!", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.No)
 				{
-					await Set_Loading_Spinner(false);
+					//await Set_Loading_Spinner(false);
 					return;
                 }
             }
@@ -5739,7 +5743,7 @@ namespace DigitalDatasheet
 					"Save & Continue?", MessageBoxButton.YesNo, MessageBoxImage.Question);
 				if (saveJob == MessageBoxResult.No)
 				{
-					await Set_Loading_Spinner(false);
+					//await Set_Loading_Spinner(false);
 					return;
                 }
 				await Save_Job();
@@ -5776,11 +5780,11 @@ namespace DigitalDatasheet
 				await Task.Run(() => hardCopy.SetHeaderInfo(headerInfo));
 				await Task.Run(() => hardCopy.SetRemarks(remarkSet));
 				await hardCopy.SaveAndClose(FormSet.Customer);
-				await Set_Loading_Spinner(false);
+				//await Set_Loading_Spinner(false);
 			}
 			catch
 			{
-				await Set_Loading_Spinner(false);
+				//await Set_Loading_Spinner(false);
 				MessageBox.Show($"Hard Copy error. Please check error log file for details.");
 			}
 		}
@@ -5857,20 +5861,21 @@ namespace DigitalDatasheet
         }
 
 		private delegate void Set_Loading_Spinner_Callback(bool loading);
-		private async Task Set_Loading_Spinner(bool loading)
+		private void Set_Loading_Spinner(bool loading)
         {
 			if (loading)
             {
 				loadingSpinnerCanvas.Visibility = Visibility.Visible;
 				job_form.Opacity = 0.4;
 				exam_info.Opacity = 0.4;
-			}
+            }
             else
             {
 				loadingSpinnerCanvas.Visibility = Visibility.Hidden;
 				job_form.Opacity = 1;
 				exam_info.Opacity = 1;
-			}
+            }
+			//return Task.CompletedTask;
         }
 		private void OnPropertyChanged([CallerMemberName] string propertyName = null)
 		{
