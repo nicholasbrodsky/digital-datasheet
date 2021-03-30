@@ -24,8 +24,7 @@ namespace DigitalDatasheet.Documents
         private int DataRowCount { get; set; } = 0;
         private int DataTableIndex { get; set; } = 2;
         string DateReceivedYear { get; set; }
-        readonly string ErrorLogFilePath = $@"\\ptlsrvr4\PTLOffice\Digital Datasheet Forms\Digital Datasheet Error Log\{DateTime.Now:D}.txt";
-        //readonly string ErrorLogFilePath = $@"C:\Users\Nicholas\Documents\PTL\DigitalDatasheetErrorLog\{DateTime.Now:D}.txt";
+        readonly string ErrorLogFilePath = $@"error_log_file_location\Digital Datasheet Error Log\{DateTime.Now:D}.txt";
         StreamWriter sw;
 
         public TestReport(string workOrderNumber, string testCondition, string partNumber, string dateCode, string testPerformedOn)
@@ -42,8 +41,7 @@ namespace DigitalDatasheet.Documents
                 WordApp = new Word.Application();
                 //WordApp.Visible = true;
                 //var test = Word.Documents
-                WordDoc = WordApp.Documents.Open(@"\\ptlsrvr4\PTLOffice\Digital Datasheet Forms\report_template.docx", true, true);
-                //WordDoc = WordApp.Documents.Open(@"C:\Users\Nicholas\Documents\PTL\report_template.docx", true, true);
+                WordDoc = WordApp.Documents.Open(@"test_report_location\report_template.docx", true, true);
                 WordDoc.Activate();
                 // make a copy of the report template before entering in any data to use in case number of data rows exceeds limit for one page
                 WordApp.ActiveDocument.Bookmarks[@"\Page"].Range.Copy();
@@ -561,7 +559,6 @@ namespace DigitalDatasheet.Documents
             {
                 //app.Visible = true;
                 // get path to directory of current work order number and determine if it exists
-                // job path = \\ptlsrvr4 \ year received \ first letter of customer (i.e. _A to M) \ customer name \ work order number
                 string letterFolder, fullDir, filePath;
                 DateReceivedYear = await new AccessDb().GetJobYear(WorkOrderNumber);
                 if (string.IsNullOrEmpty(DateReceivedYear))
@@ -574,8 +571,7 @@ namespace DigitalDatasheet.Documents
                 Regex letterFolderRegex = new Regex(@"^[a-mA-M0-9]");
                 letterFolder = letterFolderRegex.IsMatch(customer) ? "_A to M" : "_N to Z";
 
-                fullDir = $@"\\ptlsrvr4\j\{DateReceivedYear}\{letterFolder}\{customer}\{WorkOrderNumber}";
-                //fullDir = $@"C:\Users\Nicholas\Documents\PTL";
+                fullDir = $@"test_report_complete_location";
                 //DirectoryInfo job_path = new DirectoryInfo(full_dir);
                 if (!Directory.Exists(fullDir))
                 {

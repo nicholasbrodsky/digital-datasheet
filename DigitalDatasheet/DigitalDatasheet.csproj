@@ -48,7 +48,6 @@
     <Resource Include="Images\microscope_icon.ico" />
     <Resource Include="Images\new_icon.png" />
     <Resource Include="Images\open_icon.png" />
-    <Resource Include="Images\ptl_logo.png" />
     <Resource Include="Images\remove_icon.png" />
     <Resource Include="Images\save_icon.png" />
     <Resource Include="Images\search_icon.png" />

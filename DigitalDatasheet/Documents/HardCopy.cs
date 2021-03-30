@@ -23,7 +23,7 @@ namespace DigitalDatasheet.Documents
 		string TestConditionAbr { get; set; }
 		string TestPerformedOn { get; set; }
 		string DateReceivedYear { get; set; }
-		string ErrorLogFilePath { get; } = $@"\\ptlsrvr4\PTLOffice\Digital Datasheet Forms\Digital Datasheet Error Log\{DateTime.Now:D}.txt";
+		string ErrorLogFilePath { get; } = $@"error_log_file_location\Digital Datasheet Error Log\{DateTime.Now:D}.txt";
 		StreamWriter sw;
 
 		public HardCopy(string workOrderNumber, string testCondition, string testPerformedOn)
@@ -37,7 +37,7 @@ namespace DigitalDatasheet.Documents
 			{
 				WordApp = new Word.Application();
 				//WordApp.Visible = true;
-				string path = testCondition == "As Received" ? @"\\ptlsrvr4\PTLOffice\Digital Datasheet Forms\AR_datasheet_template.docx" : @"\\ptlsrvr4\PTLOffice\Digital Datasheet Forms\TS_datasheet_template.docx";
+				string path = testCondition == "As Received" ? @"hard_copy_location\Digital Datasheet Forms\AR_datasheet_template.docx" : @"hard_copy_location\Digital Datasheet Forms\TS_datasheet_template.docx";
 				//string path = testCondition == "As Received" ? @"C:\Users\Nicholas\Documents\PTL\AR_datasheet_template.docx" : @"C:\Users\Nicholas\Documents\PTL\TS_datasheet_template.docx";
 				WordDoc = WordApp.Documents.Open(path, true, true);
 			}
@@ -450,7 +450,6 @@ namespace DigitalDatasheet.Documents
 			{
 				//app.Visible = true;
 				// get path to directory of current work order number and determine if it exists
-				// job path = \\ptlsrvr4 \ year received \ first letter of customer (i.e. _A to M) \ customer name \ work order number
 				string letterFolder, fullDir, filePath;
 				DateReceivedYear = await new AccessDb().GetJobYear(WorkOrderNumber);
 				if (string.IsNullOrEmpty(DateReceivedYear))
@@ -466,8 +465,7 @@ namespace DigitalDatasheet.Documents
 				Regex letterFolderRegex = new Regex(@"^[a-mA-M0-9]");
 				letterFolder = letterFolderRegex.IsMatch(customer) ? "_A to M" : "_N to Z";
 
-				fullDir = $@"\\ptlsrvr4\j\{DateReceivedYear}\{letterFolder}\{customer}\{WorkOrderNumber}";
-				//fullDir = $@"C:\Users\Nicholas\Documents\PTL";
+				fullDir = $@"hard_copy_complete_location";
 				//DirectoryInfo job_path = new DirectoryInfo(fullDir);
 				if (!Directory.Exists(fullDir))
 				{

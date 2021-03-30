@@ -113,7 +113,6 @@ namespace DigitalDatasheet
 		#endregion UIElement Names
 
 		private bool WoCheck { get; set; } = false;
-		//public readonly string error_log_file_path = $@"\\ptlsrvr4\PTLOffice\Digital Datasheet Forms\Digital Datasheet Error Log\{DateTime.Now:D}.txt";
 		//public StreamWriter error_log_sw;
 		public bool NetConn { get; set; } = true;
 		public bool JobConflictWarning { get; set; } = false;
@@ -172,33 +171,6 @@ namespace DigitalDatasheet
 				//error_log_file_path = $@"C:\Users\{Environment.UserName.ToLower()}\Documents\Local Error Log\{DateTime.Now:D}.txt";
 			}
 			#endregion Network Check
-
-			#region Error Log Check
-			//try
-			//{
-			//    error_log_file_path = $@"\\ptlsrvr4\PTLOffice\Digital Datasheet Forms\Digital Datasheet Error Log\{DateTime.Now:D}.txt";
-			//    error_log_sw = new StreamWriter(error_log_file_path, true);
-			//    error_log_sw.Close();
-			//}
-			//catch (Exception err)
-			//{
-			//    if (MessageBox.Show("Currently unable to access network files. Any data saved will be stored on your local desktop. Would you like to continue?", "Network Connection ERROR!", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.No)
-			//    {
-			//        Close();
-			//        return;
-			//    }
-			//    network_connection = false;
-			//    //error_log_dir = $@"C:\Users\{user}\Documents";
-			//    if (!Directory.Exists($@"C:\Users\{Environment.UserName.ToLower()}\Documents\Local Error Log"))
-			//    {
-			//        Directory.CreateDirectory($@"C:\Users\{Environment.UserName.ToLower()}\Documents\Local Error Log");
-			//    }
-			//    error_log_file_path = $@"C:\Users\{Environment.UserName.ToLower()}\Documents\Local Error Log\{DateTime.Now:D}.txt";
-			//    error_log_sw = new StreamWriter(error_log_file_path, true);
-			//    error_log_sw.WriteLine($"{DateTime.Now.ToShortTimeString()}\nMainWindow Constructor -- {err.Source}; {err.TargetSite}\n{err.Message}\n");
-			//    error_log_sw.Close();
-			//}
-			#endregion Error Log Check
 
 			_ = Get_Customers();
 			_ = Get_Specification();

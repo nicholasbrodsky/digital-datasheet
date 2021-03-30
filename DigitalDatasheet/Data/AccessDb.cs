@@ -12,7 +12,7 @@ namespace DigitalDatasheet.Data
             var customers = new List<string>();
             await using (OdbcConnection conn = new OdbcConnection())
             {
-                conn.ConnectionString = @"Driver={Microsoft Access Driver (*.mdb, *.accdb)}; DBQ=\\ptlsrvr4\PTLOffice\PTL Database\ptl_db.accdb;";
+                conn.ConnectionString = @"Driver={Microsoft Access Driver (*.mdb, *.accdb)}; DBQ=database_location\database;";
                 await conn.OpenAsync();
                 string query = "select [FolderName] from [customers] order by [FolderName]";
                 OdbcCommand cmd = new OdbcCommand(query, conn);
@@ -42,7 +42,7 @@ namespace DigitalDatasheet.Data
             bool expedite = false;
             await using (OdbcConnection conn = new OdbcConnection())
             {
-                conn.ConnectionString = @"Driver={Microsoft Access Driver (*.mdb, *.accdb)}; DBQ=\\ptlsrvr4\PTLOffice\PTL Database\ptl_db.accdb;";
+                conn.ConnectionString = @"Driver={Microsoft Access Driver (*.mdb, *.accdb)}; DBQ=database_location\database;";
                 await conn.OpenAsync();
                 string query = $"select [Date Due], Expedite from [Work Orders] where [Work Order No] = ? and [WO Dash] = ?";
                 var cmd = new OdbcCommand(query, conn);
@@ -77,7 +77,7 @@ namespace DigitalDatasheet.Data
             string dateReceivedYear = string.Empty;
             using (var conn = new OdbcConnection())
             {
-                conn.ConnectionString = @"Driver={Microsoft Access Driver (*.mdb, *.accdb)}; DBQ=\\ptlsrvr4\PTLOffice\PTL Database\ptl_db.accdb;";
+                conn.ConnectionString = @"Driver={Microsoft Access Driver (*.mdb, *.accdb)}; DBQ=database_location\database;";
                 await conn.OpenAsync();
                 string query = $"select [Date Received] from [Work Orders] where [Work Order No] = ? and [WO Dash] = ?";
                 var cmd = new OdbcCommand(query, conn);

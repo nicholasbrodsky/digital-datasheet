@@ -10,7 +10,7 @@
         WindowStartupLocation="CenterScreen"
         Closing="Window_Closing"
         Closed="Window_Closed"
-        Title="PTL - Digital Datasheet"
+        Title="Digital Datasheet"
         Height="{x:Static SystemParameters.PrimaryScreenHeight}"
         Width="{x:Static SystemParameters.PrimaryScreenWidth}"
         WindowState="Maximized">
@@ -109,11 +109,11 @@
         </Menu>
         <!--#endregion Menu-->
 
-        <!--#region PTL Logo Header-->
+        <!--#region Logo Header-->
         <Border DockPanel.Dock="Top" Height="60" Background="#337ab7">
-            <Image Source="Images/ptl_logo.png" Stretch="None" Height="Auto" />
+            <TextBlock Text="Company Name" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="#fff" FontSize="32" />
         </Border>
-        <!--#endregion PTL Logo Header-->
+        <!--#endregion Logo Header-->
 
         <!--#region Current Job & Toggle Form -->
         <Border DockPanel.Dock="Top" BorderBrush="#337ab7" BorderThickness="0 0 0 .4" Margin="12 0" Padding="0 0 0 4">
@@ -437,8 +437,8 @@
                             <TextBox Text="{Binding Path=FormSet.BoardType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" x:Name="board_type_input" Padding="2" Height="25" FontSize="14" />
                         </StackPanel>
                         <StackPanel Margin="0 0 24 0">
-                            <TextBlock Text="PTL Test Procedure" FontSize="16" Margin="4" />
-                            <!-- PTL Test Procedure -->
+                            <TextBlock Text="Test Procedure" FontSize="16" Margin="4" />
+                            <!-- Test Procedure -->
                             <TextBox Text="{Binding Path=FormSet.TestProcedure, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" x:Name="test_procedure_input" Padding="2" Height="25" FontSize="14" CharacterCasing="Upper" />
                         </StackPanel>
                         <StackPanel>

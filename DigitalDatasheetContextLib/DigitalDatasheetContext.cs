@@ -15,7 +15,7 @@ namespace DigitalDatasheetContextLib
         public DbSet<SpecificationRequirements> SpecificationRequirementsTable { get; set; }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            string path = Path.Combine(@"\\ptlsrvr4\PTLOffice\DatasheetDB", "DigitalDatasheet.db");
+            string path = Path.Combine(@"database_location", "database_name.db");
             optionsBuilder.UseSqlite($"Filename={path}");
         }
         protected override void OnModelCreating(ModelBuilder modelBuilder)

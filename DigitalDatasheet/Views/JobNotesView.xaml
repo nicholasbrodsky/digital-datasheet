@@ -54,7 +54,10 @@
         </Border>
 
         <StackPanel Grid.Column="0" Grid.Row="2" Margin="12">
-            <TextBlock Text="User" Padding="2" FontSize="16" />
+            <TextBlock Padding="2" FontSize="16">
+                <Run Text="User" />
+                <Run Text=" (initials)" FontSize="10" />
+            </TextBlock>
             <TextBox x:Name="userInput" Text="{Binding Path=User, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                      Height="25" Padding="2" FontSize="14" CharacterCasing="Upper" MaxLength="2" />
         </StackPanel>
